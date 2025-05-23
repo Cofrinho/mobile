@@ -1,10 +1,34 @@
-// https://docs.expo.dev/guides/using-eslint/
-const { defineConfig } = require('eslint/config');
-const expoConfig = require('eslint-config-expo/flat');
+const js = require('@eslint/js');
+const react = require('eslint-plugin-react');
+const reactHooks = require('eslint-plugin-react-hooks');
+const expo = require('eslint-config-expo/flat');
 
-module.exports = defineConfig([
-  expoConfig,
-  {
-    ignores: ['dist/*'],
-  },
-]);
+module.exports = [
+	...expo,
+	{
+		ignores: ['dist'],
+	},
+	{
+		files: ['**/*.{js,jsx,ts,tsx}'],
+		settings: {
+			react: { version: '18.3' },
+		},
+		plugins: {
+			react,
+			'react-hooks': reactHooks,
+		},
+		rules: {
+			...js.configs.recommended.rules,
+			...react.configs.recommended.rules,
+			...react.configs['jsx-runtime'].rules,
+			...reactHooks.configs.recommended.rules,
+			'react/jsx-no-target-blank': 'off',
+			quotes: ['error', 'single'],
+			semi: ['error', 'always'],
+			'no-unused-vars': ['error'],
+			'class-methods-use-this': 'off',
+			'no-param-reassign': 'off',
+			'no-console': ['error', { allow: ['warn', 'error'] }],
+		},
+	},
+];
