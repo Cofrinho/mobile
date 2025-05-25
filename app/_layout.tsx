@@ -1,9 +1,9 @@
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
 
-// Impede que a Splash desapareça automaticamente
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -12,7 +12,6 @@ export default function RootLayout() {
   useEffect(() => {
     async function prepare() {
       try {
-        // Simula carregamento (ex: fontes, dados iniciais, etc)
         await new Promise((resolve) => setTimeout(resolve, 1500));
       } catch (e) {
         console.warn(e);
@@ -34,7 +33,10 @@ export default function RootLayout() {
 
   return (
     <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-      <Stack />
+      <StatusBar style="dark" />
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
     </View>
   );
 }
