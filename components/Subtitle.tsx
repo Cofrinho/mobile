@@ -4,10 +4,11 @@ import { StyleSheet, Text } from 'react-native';
 
 type SubtitleProps = {
   children: React.ReactNode;
+  center?: boolean;
 };
 
-export default function Subtitle({ children }: SubtitleProps) {
-  return <Text style={styles.subtitle}>{children}</Text>;
+export default function Subtitle({ children, center }: SubtitleProps) {
+  return <Text style={[styles.subtitle, center ? { textAlign: 'center' } : null]}>{children}</Text>;
 }
 
 const styles = StyleSheet.create({

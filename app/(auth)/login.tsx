@@ -2,9 +2,12 @@ import RoundedButton from '@/components/RoundedButton';
 import RoundedInput from '@/components/RoundedInput';
 import Subtitle from '@/components/Subtitle';
 import Colors from '@/constants/colors';
-import { StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function Login() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
@@ -26,7 +29,9 @@ export default function Login() {
 
       <View style={styles.registerContainer}>
         <Subtitle>Não possui uma conta?</Subtitle>
-        <Text style={styles.text}>Registrar</Text>
+        <TouchableOpacity onPress={() => router.push('/register')}>
+          <Text style={styles.text}>Registrar</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

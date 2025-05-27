@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     width: '100%',
-    padding: 24,
+    padding: 16,
     paddingRight: 80,
   },
   container: {
