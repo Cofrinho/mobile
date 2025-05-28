@@ -1,56 +1,60 @@
+import CodeInput from '@/components/CodeInput';
 import RoundedButton from '@/components/RoundedButton';
-import RoundedInput from '@/components/RoundedInput';
 import Subtitle from '@/components/Subtitle';
 import Colors from '@/constants/colors';
 import { useRouter } from 'expo-router';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-export default function Login() {
+export default function Code() {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>Entre na sua Conta</Text>
-        <Subtitle>Começe a dividir suas despesas</Subtitle>
+        <Text style={styles.title}>Informe o código recebido</Text>
+        <Subtitle center>
+          Caso não tenha recebido o código de confirmação via email, verifique a sua caixa de spam
+        </Subtitle>
       </View>
 
       <View style={styles.formContainer}>
         <View style={styles.formFieldsContainer}>
-          <RoundedInput
-            placeholder="Email"
-            keyboardType="email-address"
+          <CodeInput
+            keyboardType="number-pad"
             autoCapitalize="none"
             autoCorrect={false}
-            textContentType="emailAddress"
-            autoComplete="email"
-            inputMode="email"
+            textContentType="oneTimeCode"
+            inputMode="numeric"
           />
-          <RoundedInput
-            placeholder="Senha"
-            isPassword
-            keyboardType="default"
+          <CodeInput
+            keyboardType="number-pad"
             autoCapitalize="none"
-            autoCorrect={true}
-            textContentType="password"
-            autoComplete="password"
-            inputMode="text"
+            autoCorrect={false}
+            textContentType="oneTimeCode"
+            inputMode="numeric"
+          />
+          <CodeInput
+            keyboardType="number-pad"
+            autoCapitalize="none"
+            autoCorrect={false}
+            textContentType="oneTimeCode"
+            inputMode="numeric"
+          />
+          <CodeInput
+            keyboardType="number-pad"
+            autoCapitalize="none"
+            autoCorrect={false}
+            textContentType="oneTimeCode"
+            inputMode="numeric"
           />
         </View>
 
         <View style={styles.formButtonContainer}>
-          <RoundedButton text="LOGIN" />
-          <TouchableOpacity onPress={() => router.push('/forgot-password')}>
-            <Text style={styles.text}>Esqueceu sua senha?</Text>
-          </TouchableOpacity>
+          <RoundedButton
+            text="CONFIRMAR CÓDIGO"
+            onPress={() => router.push('/forgot-password/reset-password')}
+          />
         </View>
-      </View>
-
-      <View style={styles.registerContainer}>
-        <Subtitle>Não possui uma conta?</Subtitle>
-        <TouchableOpacity onPress={() => router.push('/register')}>
-          <Text style={styles.text}>Registrar</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -84,6 +88,8 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     gap: 12,
+    flex: 1,
+    justifyContent: 'space-around',
   },
   formButtonContainer: {
     width: '100%',
@@ -94,6 +100,9 @@ const styles = StyleSheet.create({
   formFieldsContainer: {
     width: '100%',
     gap: 12,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   titleContainer: {
     gap: 8,

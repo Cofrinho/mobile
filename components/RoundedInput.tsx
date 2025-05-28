@@ -1,14 +1,14 @@
 import Colors from '@/constants/colors';
 import { Eye, EyeOff } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
 
-interface Props {
+type Props = TextInputProps & {
   placeholder: string;
   isPassword?: boolean;
-}
+};
 
-export default function RoundedInput({ placeholder, isPassword }: Props) {
+export default function RoundedInput({ placeholder, isPassword, ...props }: Props) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -18,7 +18,7 @@ export default function RoundedInput({ placeholder, isPassword }: Props) {
         placeholder={placeholder}
         placeholderTextColor={Colors.lightGray}
         secureTextEntry={isPassword && !showPassword}
-        autoCapitalize="none"
+        {...props}
       />
       {isPassword && (
         <TouchableOpacity
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     width: '100%',
-    padding: 24,
+    padding: 16,
     paddingRight: 80,
   },
   container: {
