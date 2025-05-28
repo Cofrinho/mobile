@@ -5,7 +5,7 @@ import Subtitle from '@/components/Subtitle';
 import Colors from '@/constants/colors';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 export default function Register() {
   const router = useRouter();
@@ -26,10 +26,36 @@ export default function Register() {
               <Text style={{ color: Colors.black, fontWeight: 'bold', marginLeft: 4 }}>
                 Dados Pessoais
               </Text>
-              <RoundedInput placeholder="Nome completo" />
-              <RoundedInput placeholder="Cpf" />
+              <RoundedInput
+                placeholder="Nome completo"
+                keyboardType="default"
+                autoCapitalize="words"
+                autoCorrect={true}
+                textContentType="name"
+                autoComplete="name"
+                inputMode="text"
+              />
+
+              <RoundedInput
+                placeholder="Cpf"
+                keyboardType="numeric"
+                autoCapitalize="none"
+                autoCorrect={false}
+                textContentType="none"
+                autoComplete="off"
+                inputMode="numeric"
+              />
+
               {/* TODO: CRIAR INPUT DE DATA */}
-              <RoundedInput placeholder="Data de Nascimento" />
+              <RoundedInput
+                placeholder="Data de Nascimento"
+                keyboardType="default"
+                autoCapitalize="none"
+                autoCorrect={false}
+                textContentType="birthdate"
+                autoComplete="birthdate-full"
+                inputMode="text"
+              />
             </View>
           )}
 
@@ -39,9 +65,27 @@ export default function Register() {
                 <Text style={{ color: Colors.black, fontWeight: 'bold', marginLeft: 4 }}>
                   Dados de Contato
                 </Text>
-                <RoundedInput placeholder="Email" />
+
+                <RoundedInput
+                  placeholder="Email"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  textContentType="emailAddress"
+                  autoComplete="email"
+                  inputMode="email"
+                />
+
                 {/* TODO: CRIAR INPUT DE CELULAR */}
-                <RoundedInput placeholder="Celular" />
+                <RoundedInput
+                  placeholder="Celular"
+                  keyboardType="phone-pad"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  textContentType="telephoneNumber"
+                  autoComplete="tel"
+                  inputMode="tel"
+                />
               </View>
             </View>
           )}
@@ -52,9 +96,27 @@ export default function Register() {
                 <Text style={{ color: Colors.black, fontWeight: 'bold', marginLeft: 4 }}>
                   Defina uma senha
                 </Text>
-                <RoundedInput placeholder="Senha" isPassword />
-                {/* TODO: CRIAR INPUT DE CELULAR */}
-                <RoundedInput placeholder="Confirme sua senha" isPassword />
+                <RoundedInput
+                  placeholder="Senha"
+                  isPassword
+                  keyboardType="default"
+                  autoCapitalize="none"
+                  autoCorrect={true}
+                  textContentType="password"
+                  autoComplete="password"
+                  inputMode="text"
+                />
+
+                <RoundedInput
+                  placeholder="Confirme sua senha"
+                  isPassword
+                  keyboardType="default"
+                  autoCapitalize="none"
+                  autoCorrect={true}
+                  textContentType="password"
+                  autoComplete="password"
+                  inputMode="text"
+                />
               </View>
             </View>
           )}
@@ -66,19 +128,12 @@ export default function Register() {
             onPress={() => (step == 3 ? router.push('/register/successfull') : setStep(step + 1))}
           />
         </View>
-
-        <View style={styles.formStepsContainer}>
-          <Stepper onPress={() => setStep(1)} active={step == 1} />
-          <Stepper onPress={() => setStep(2)} active={step == 2} />
-          <Stepper onPress={() => setStep(3)} active={step == 3} />
-        </View>
       </View>
 
-      <View style={styles.registerContainer}>
-        <Subtitle>Já possui uma conta?</Subtitle>
-        <TouchableOpacity onPress={() => router.push('/login')}>
-          <Text style={styles.text}>Entrar</Text>
-        </TouchableOpacity>
+      <View style={styles.formStepsContainer}>
+        <Stepper onPress={() => setStep(1)} active={step == 1} />
+        <Stepper onPress={() => setStep(2)} active={step == 2} />
+        <Stepper onPress={() => setStep(3)} active={step == 3} />
       </View>
     </View>
   );

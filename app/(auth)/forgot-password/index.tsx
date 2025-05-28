@@ -3,16 +3,16 @@ import RoundedInput from '@/components/RoundedInput';
 import Subtitle from '@/components/Subtitle';
 import Colors from '@/constants/colors';
 import { useRouter } from 'expo-router';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-export default function Login() {
+export default function ForgotPassword() {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>Entre na sua Conta</Text>
-        <Subtitle>Começe a dividir suas despesas</Subtitle>
+        <Text style={styles.title}>Esqueceu sua senha?</Text>
+        <Subtitle center>Sem problemas! Siga as instruções para redefinir sua senha</Subtitle>
       </View>
 
       <View style={styles.formContainer}>
@@ -26,31 +26,14 @@ export default function Login() {
             autoComplete="email"
             inputMode="email"
           />
-          <RoundedInput
-            placeholder="Senha"
-            isPassword
-            keyboardType="default"
-            autoCapitalize="none"
-            autoCorrect={true}
-            textContentType="password"
-            autoComplete="password"
-            inputMode="text"
-          />
         </View>
 
         <View style={styles.formButtonContainer}>
-          <RoundedButton text="LOGIN" />
-          <TouchableOpacity onPress={() => router.push('/forgot-password')}>
-            <Text style={styles.text}>Esqueceu sua senha?</Text>
-          </TouchableOpacity>
+          <RoundedButton
+            text="ENVIAR CÓDIGO"
+            onPress={() => router.push('/forgot-password/code')}
+          />
         </View>
-      </View>
-
-      <View style={styles.registerContainer}>
-        <Subtitle>Não possui uma conta?</Subtitle>
-        <TouchableOpacity onPress={() => router.push('/register')}>
-          <Text style={styles.text}>Registrar</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -59,19 +42,14 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: 104,
+    gap: 72,
   },
   text: {
     color: Colors.primary,
     fontWeight: 'bold',
     fontSize: 16,
-  },
-  registerContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    gap: 4,
   },
   title: {
     fontSize: 24,
