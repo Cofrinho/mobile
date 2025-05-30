@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 export default function Page() {
   // fake auth state to control auth screens render
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   return isAuthenticated ? (
     <Redirect href={'/(tabs)/account'} />
