@@ -24,7 +24,11 @@ export default function Page() {
   return (
     <View style={styles.container}>
       <View style={styles.userAndNotificationContainer}>
-        <View style={styles.userContainer}>
+        <TouchableOpacity
+          activeOpacity={1}
+          style={styles.userContainer}
+          onPress={() => router.push('/user')}
+        >
           <View style={styles.userAvatarContainer}>
             {user.avatar ? (
               <Image src={user.avatar} />
@@ -34,7 +38,7 @@ export default function Page() {
           </View>
 
           <Text style={styles.username}>{user.name}</Text>
-        </View>
+        </TouchableOpacity>
 
         <NotificationButton quantity={4} onPress={() => router.push('/notifications')} />
       </View>
@@ -70,7 +74,7 @@ export default function Page() {
         <CircleIconButton icon={<Plus color={Colors.primary} />} color="#fff" />
       </View>
 
-      <View style={{}}>
+      <TouchableOpacity activeOpacity={1} onPress={() => router.push('/total-balance')}>
         <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
           <Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 16 }}>
             Saldo total
@@ -110,9 +114,7 @@ export default function Page() {
               ></View>
             </View>
 
-            <TouchableOpacity>
-              <ChevronRight color={Colors.primary} size={24} />
-            </TouchableOpacity>
+            <ChevronRight color={Colors.primary} size={24} />
           </View>
         </View>
 
@@ -122,13 +124,14 @@ export default function Page() {
           color={Colors.black}
           size={28}
         />
-      </View>
+      </TouchableOpacity>
 
       <OFCard />
 
       <View style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <TouchableOpacity
           onPress={() => router.push('/transactions')}
+          activeOpacity={1}
           style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}
         >
           <Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 16 }}>
