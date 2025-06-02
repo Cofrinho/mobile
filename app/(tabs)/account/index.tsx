@@ -4,15 +4,23 @@ import NotificationButton from '@/components/NotificationButton';
 import OFCard from '@/components/OFCard';
 import TransactionCard from '@/components/TransactionCard';
 import Colors from '@/constants/colors';
-import { BanknoteArrowUp, ChevronRight, Eye, Plus } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { BanknoteArrowUp, ChevronRight, Eye, EyeClosed, Plus } from 'lucide-react-native';
+import { useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const user = {
   avatar: '',
   name: 'Usuário da Silva',
+  cofrinhoBalance: 1349,
+  openFinanceBalance: 3412,
 };
 
 export default function Page() {
+  const router = useRouter();
+
+  const [showBalance, setShowBalance] = useState(true);
+
   return (
     <View style={styles.container}>
       <View style={styles.userAndNotificationContainer}>
@@ -28,7 +36,7 @@ export default function Page() {
           <Text style={styles.username}>{user.name}</Text>
         </View>
 
-        <NotificationButton quantity={4} />
+        <NotificationButton quantity={4} onPress={() => router.push('/notifications')} />
       </View>
 
       <View style={styles.welcomeAndEyeContainer}>
@@ -38,17 +46,25 @@ export default function Page() {
         </View>
 
         <CircleIconButton
-          icon={<Eye color={Colors.primary} width={24} height={24} />}
+          icon={
+            showBalance ? (
+              <Eye color={Colors.primary} size={24} />
+            ) : (
+              <EyeClosed color={Colors.primary} size={24} />
+            )
+          }
           width={44}
           height={44}
           color={Colors.secondary}
+          onPress={() => setShowBalance((prevState) => !prevState)}
+          activeOpacity={1}
         />
       </View>
 
       <View style={styles.cofrinhoBalanceContainer}>
         <View style={{ gap: 2 }}>
           <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>Saldo no cofrinho</Text>
-          <MoneyText amount={1349} size={28} color="#fff" />
+          <MoneyText showMoney={showBalance} amount={user.cofrinhoBalance} size={28} color="#fff" />
         </View>
 
         <CircleIconButton icon={<Plus color={Colors.primary} />} color="#fff" />
@@ -100,7 +116,12 @@ export default function Page() {
           </View>
         </View>
 
-        <MoneyText amount={3412} color={Colors.black} size={28} />
+        <MoneyText
+          showMoney={showBalance}
+          amount={user.openFinanceBalance}
+          color={Colors.black}
+          size={28}
+        />
       </View>
 
       <OFCard />
@@ -122,6 +143,11 @@ export default function Page() {
 
         <ScrollView>
           <View style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <TransactionCard
+              icon={<BanknoteArrowUp color={Colors.primary} size={24} />}
+              value={40}
+              title="Recarga Cofrinho"
+            />
             <TransactionCard
               icon={<BanknoteArrowUp color={Colors.primary} size={24} />}
               value={40}

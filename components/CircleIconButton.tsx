@@ -9,7 +9,7 @@ type props = TouchableOpacityProps & {
   border?: boolean;
 };
 
-export default function CircleIconButton({ icon, color, border, width, height }: props) {
+export default function CircleIconButton({ icon, color, border, width, height, ...props }: props) {
   return (
     <TouchableOpacity
       style={[
@@ -19,6 +19,7 @@ export default function CircleIconButton({ icon, color, border, width, height }:
         { width: width || 32 },
         { height: height || 32 },
       ]}
+      {...props}
     >
       {icon}
     </TouchableOpacity>

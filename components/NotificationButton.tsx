@@ -5,9 +5,10 @@ import CircleIconButton from './CircleIconButton';
 
 type props = {
   quantity: number;
+  onPress: VoidFunction;
 };
 
-export default function NotificationButton({ quantity }: props) {
+export default function NotificationButton({ quantity, onPress }: props) {
   return (
     <View>
       <CircleIconButton
@@ -15,6 +16,8 @@ export default function NotificationButton({ quantity }: props) {
         icon={<Bell color={Colors.primary} width={24} height={24} />}
         width={44}
         height={44}
+        activeOpacity={1}
+        onPress={onPress}
       />
 
       <View style={styles.quantity}>

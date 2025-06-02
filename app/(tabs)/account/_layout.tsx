@@ -1,4 +1,4 @@
-import { Slot, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AccountLayout() {
@@ -6,9 +6,7 @@ export default function AccountLayout() {
     <SafeAreaView
       style={{ paddingHorizontal: 24, flex: 1, paddingTop: 12, backgroundColor: '#fff' }}
     >
-      <Stack screenOptions={{ headerShown: false }}>
-        <Slot />
-      </Stack>
+      <Stack screenOptions={{ headerShown: false }} />
     </SafeAreaView>
   );
 }
