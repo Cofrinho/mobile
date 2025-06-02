@@ -24,7 +24,11 @@ export default function Page() {
   return (
     <View style={styles.container}>
       <View style={styles.userAndNotificationContainer}>
-        <View style={styles.userContainer}>
+        <TouchableOpacity
+          activeOpacity={1}
+          style={styles.userContainer}
+          onPress={() => router.push('/user')}
+        >
           <View style={styles.userAvatarContainer}>
             {user.avatar ? (
               <Image src={user.avatar} />
@@ -34,7 +38,7 @@ export default function Page() {
           </View>
 
           <Text style={styles.username}>{user.name}</Text>
-        </View>
+        </TouchableOpacity>
 
         <NotificationButton quantity={4} onPress={() => router.push('/notifications')} />
       </View>
