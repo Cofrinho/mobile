@@ -1,16 +1,17 @@
 import Colors from '@/constants/colors';
+import { BanknoteArrowDown, BanknoteArrowUp } from 'lucide-react-native';
 import React from 'react';
 import { Text, TouchableOpacity, TouchableOpacityProps, View } from 'react-native';
 import MoneyText from './MoneyText';
 
 type props = TouchableOpacityProps & {
+  operation: string;
   title: string;
-  icon: React.ReactNode;
   value: number;
   group?: string;
 };
 
-export default function TransactionCard({ title, icon, value, group }: props) {
+export default function TransactionCard({ operation, title, value, group }: props) {
   return (
     <TouchableOpacity
       style={{
@@ -35,12 +36,42 @@ export default function TransactionCard({ title, icon, value, group }: props) {
             alignItems: 'center',
           }}
         >
-          {icon}
+          {operation === 'in' ? (
+            <BanknoteArrowUp color={Colors.primary} />
+          ) : (
+            <BanknoteArrowDown color={Colors.primary} />
+          )}
         </View>
 
         <View style={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
           <Text style={{ color: Colors.lightGray, fontWeight: 'bold' }}>{title}</Text>
-          <MoneyText amount={49} color={Colors.green} size={12} />
+
+          <View style={{ display: 'flex', flexDirection: 'row', gap: 2, alignItems: 'center' }}>
+            {operation === 'in' ? (
+              <Text
+                style={{
+                  fontWeight: 'semibold',
+                  color: operation === 'in' ? Colors.green : Colors.red,
+                }}
+              >
+                +
+              </Text>
+            ) : (
+              <Text
+                style={{
+                  fontWeight: 'semibold',
+                  color: operation === 'in' ? Colors.green : Colors.red,
+                }}
+              >
+                -
+              </Text>
+            )}
+            <MoneyText
+              amount={value}
+              color={operation === 'in' ? Colors.green : Colors.red}
+              size={12}
+            />
+          </View>
         </View>
       </View>
     </TouchableOpacity>

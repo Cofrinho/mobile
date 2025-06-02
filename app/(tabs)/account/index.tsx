@@ -5,7 +5,7 @@ import OFCard from '@/components/OFCard';
 import TransactionCard from '@/components/TransactionCard';
 import Colors from '@/constants/colors';
 import { useRouter } from 'expo-router';
-import { BanknoteArrowUp, ChevronRight, Eye, EyeClosed, Plus } from 'lucide-react-native';
+import { ChevronRight, Eye, EyeClosed, Plus } from 'lucide-react-native';
 import { useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -127,15 +127,16 @@ export default function Page() {
       <OFCard />
 
       <View style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+        <TouchableOpacity
+          onPress={() => router.push('/transactions')}
+          style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}
+        >
           <Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 16 }}>
             Entradas e saídas
           </Text>
 
-          <TouchableOpacity>
-            <ChevronRight color={Colors.primary} size={24} />
-          </TouchableOpacity>
-        </View>
+          <ChevronRight color={Colors.primary} size={24} />
+        </TouchableOpacity>
 
         <Text style={{ color: Colors.lightGray, fontWeight: 'bold', fontSize: 16 }}>
           Últimas transações
@@ -143,21 +144,9 @@ export default function Page() {
 
         <ScrollView>
           <View style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <TransactionCard
-              icon={<BanknoteArrowUp color={Colors.primary} size={24} />}
-              value={40}
-              title="Recarga Cofrinho"
-            />
-            <TransactionCard
-              icon={<BanknoteArrowUp color={Colors.primary} size={24} />}
-              value={40}
-              title="Recarga Cofrinho"
-            />
-            <TransactionCard
-              icon={<BanknoteArrowUp color={Colors.primary} size={24} />}
-              value={40}
-              title="Recarga Cofrinho"
-            />
+            <TransactionCard operation="in" value={40} title="Recarga Cofrinho" />
+            <TransactionCard operation="out" value={40} title="Recarga Cofrinho" />
+            <TransactionCard operation="in" value={40} title="Recarga Cofrinho" />
           </View>
         </ScrollView>
       </View>
