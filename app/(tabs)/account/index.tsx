@@ -27,7 +27,7 @@ export default function Page() {
         <TouchableOpacity
           activeOpacity={1}
           style={styles.userContainer}
-          onPress={() => router.push('/user')}
+          onPress={() => router.push('/(user)/user')}
         >
           <View style={styles.userAvatarContainer}>
             {user.avatar ? (
