@@ -32,11 +32,14 @@ export default function OFAccountCard({ logo, name, agency, account, amount }: p
           gap: 12,
         }}
       >
-        <View
-          style={{ width: 36, height: 36, borderRadius: 100, backgroundColor: Colors.secondary }}
-        >
-          <Image src={logo} />
-        </View>
+        <Image
+          source={{
+            uri: logo,
+          }}
+          width={36}
+          height={36}
+          style={{ borderRadius: 100 }}
+        />
 
         <View>
           <Text style={{ fontWeight: 'bold' }}>{name}</Text>
