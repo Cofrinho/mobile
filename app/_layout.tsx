@@ -42,6 +42,7 @@ export default function RootLayout() {
         <Stack.Screen name="total-balance" options={{ headerShown: false }} />
         <Stack.Screen name="(user)" options={{ headerShown: false }} />
         <Stack.Screen name="(open-finance)" options={{ headerShown: false }} />
+        <Stack.Screen name="(bank-app)" options={{ headerShown: false }} />
       </Stack>
     </View>
   );

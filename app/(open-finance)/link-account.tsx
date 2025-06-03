@@ -29,7 +29,11 @@ export default function LinkAccount() {
   const router = useRouter();
 
   const renderItem = ({ item }: { item: institution }) => (
-    <OFInstitutionCard logo={item.logo} name={item.name} />
+    <OFInstitutionCard
+      logo={item.logo}
+      name={item.name}
+      onPress={() => router.push(`/(open-finance)/link-expiration/${item.id}`)}
+    />
   );
 
   return (

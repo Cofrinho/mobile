@@ -5,9 +5,10 @@ import { Image, Text, TouchableOpacity, TouchableOpacityProps, View } from 'reac
 type props = TouchableOpacityProps & {
   name: string;
   logo: string;
+  showIcon?: boolean;
 };
 
-export default function OFInstitutionCard({ name, logo, ...props }: props) {
+export default function OFInstitutionCard({ name, logo, showIcon = true, ...props }: props) {
   return (
     <TouchableOpacity
       style={{
@@ -34,7 +35,7 @@ export default function OFInstitutionCard({ name, logo, ...props }: props) {
         <Text style={{ fontWeight: 'bold' }}>{name}</Text>
       </View>
 
-      <ArrowRight />
+      {showIcon && <ArrowRight />}
     </TouchableOpacity>
   );
 }
