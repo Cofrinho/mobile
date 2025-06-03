@@ -1,4 +1,5 @@
 import Button from '@/components/Button';
+import MoneyText from '@/components/MoneyText';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { Image, StyleSheet, Text, View } from 'react-native';
@@ -15,12 +16,13 @@ const account = {
   institutionName: 'Banco do Brasil',
   account: '00458231',
   agency: '1743',
+  balance: 10000,
 };
 
-export default function BankApp() {
+export default function BankAppPayment() {
   const router = useRouter();
 
-  const { id } = useLocalSearchParams();
+  const { id, value } = useLocalSearchParams();
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: institution.color, gap: 16 }]}>
@@ -42,21 +44,22 @@ export default function BankApp() {
       >
         <View style={{ display: 'flex', alignItems: 'center', flexDirection: 'row', gap: 4 }}>
           <Image
-            source={require('../../assets/images/open-finance.png')}
+            source={require('@/assets/images/open-finance.png')}
             style={{ width: 24, height: 24 }}
           />
-          <Text style={{ fontWeight: 'bold' }}>Compartilhamento via Open Finance</Text>
+          <Text style={{ fontWeight: 'bold' }}>Pagamento via Open Finance</Text>
         </View>
         <Text>Instituicão: {account.institutionName}</Text>
         <Text>Conta: {account.account}</Text>
         <Text>Agência: {account.agency}</Text>
+        <MoneyText amount={Number(value) / 100} size={16} />
       </View>
 
       <Button
-        text="COMPARTILHAR DADOS"
+        text="CONFIRMAR PAGAMENTO"
         color="#fff"
         textColor="#000"
-        onPress={() => router.push('/(open-finance)/link-successfull/${id}')}
+        onPress={() => router.push('/add-funds/successfull')}
       />
     </SafeAreaView>
   );

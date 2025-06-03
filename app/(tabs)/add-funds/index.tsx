@@ -90,7 +90,7 @@ export default function AddFunds() {
 
         <Button
           text="PROSSEGUIR PARA O PAGAMENTO"
-          onPress={() => router.push('../(open-finance)/select-payment/account/1')}
+          onPress={() => router.replace(`/(open-finance)/select-payment-account/${rawValue}`)}
         />
       </View>
     </View>

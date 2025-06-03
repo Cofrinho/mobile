@@ -18,7 +18,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="addFunds"
+        name="add-funds"
         options={{
           tabBarIcon: ({ color }) => <Plus color={color} />,
           tabBarShowLabel: false,

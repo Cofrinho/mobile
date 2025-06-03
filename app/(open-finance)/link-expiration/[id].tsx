@@ -68,7 +68,7 @@ export default function LinkExpiration() {
         </View>
       </View>
 
-      <Button text="CONFIRMAR" onPress={() => router.push(`/(bank-app)/${id}`)} />
+      <Button text="CONFIRMAR" onPress={() => router.push(`/(bank-app)/open-finance/${id}`)} />
     </View>
   );
 }
