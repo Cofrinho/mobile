@@ -27,7 +27,7 @@ export default function Page() {
         <TouchableOpacity
           activeOpacity={1}
           style={styles.userContainer}
-          onPress={() => router.push('/user')}
+          onPress={() => router.push('/(user)/user')}
         >
           <View style={styles.userAvatarContainer}>
             {user.avatar ? (
@@ -71,7 +71,11 @@ export default function Page() {
           <MoneyText showMoney={showBalance} amount={user.cofrinhoBalance} size={28} color="#fff" />
         </View>
 
-        <CircleIconButton icon={<Plus color={Colors.primary} />} color="#fff" />
+        <CircleIconButton
+          icon={<Plus color={Colors.primary} />}
+          color="#fff"
+          onPress={() => router.push('/add-funds')}
+        />
       </View>
 
       <TouchableOpacity activeOpacity={1} onPress={() => router.push('/total-balance')}>

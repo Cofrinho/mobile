@@ -18,7 +18,7 @@ export default function OFCard({ ...props }: TouchableOpacityProps) {
         justifyContent: 'center',
       }}
       activeOpacity={1}
-      onPress={() => router.push('/open-finance')}
+      onPress={() => router.push('/(open-finance)/open-finance')}
     >
       <View
         style={{

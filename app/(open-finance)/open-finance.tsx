@@ -1,15 +1,15 @@
+import Button from '@/components/Button';
 import CircleIconButton from '@/components/CircleIconButton';
 import OFAccountCard from '@/components/OFAccountCard';
 import Colors from '@/constants/colors';
 import { useRouter } from 'expo-router';
 import { Undo2 } from 'lucide-react-native';
 import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 const accounts = [
   {
     id: '1',
-    logo: 'sss',
+    logo: 'https://designconceitual.com.br/wp-content/uploads/2023/12/Ita%C3%BA-novo-logotipo-2023-1000x600.jpg',
     name: 'Itaú',
     amount: 1000,
     account: '124938439',
@@ -17,7 +17,7 @@ const accounts = [
   },
   {
     id: '2',
-    logo: 'sss',
+    logo: 'https://cdn-1.webcatalog.io/catalog/nubank/nubank-icon-filled-256.png?v=1745196590866',
     name: 'Nubank',
     amount: 324,
     account: '99763525',
@@ -48,37 +48,38 @@ export default function OpenFinance() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <CircleIconButton
-            color={Colors.secondary}
-            icon={<Undo2 size={24} color={Colors.primary} />}
-            onPress={() => router.back()}
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <CircleIconButton
+          color={Colors.secondary}
+          icon={<Undo2 size={24} color={Colors.primary} />}
+          onPress={() => router.back()}
+        />
+
+        <View style={styles.titleContainer}>
+          <Image
+            source={require('../../assets/images/open-finance.png')}
+            style={{ width: 24, height: 24 }}
           />
 
-          <View style={styles.titleContainer}>
-            <Image
-              source={require('../assets/images/open-finance.png')}
-              style={{ width: 24, height: 24 }}
-            />
-
-            <Text style={styles.title}>Open Finance</Text>
-          </View>
+          <Text style={styles.title}>Open Finance</Text>
         </View>
-
-        <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Contas conectadas</Text>
-
-        <FlatList
-          data={accounts}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={{ paddingVertical: 12 }}
-          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-          showsVerticalScrollIndicator={false}
-        />
       </View>
-    </SafeAreaView>
+
+      <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Contas conectadas</Text>
+
+      <FlatList
+        data={accounts}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        contentContainerStyle={{ paddingVertical: 12 }}
+        ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+        showsVerticalScrollIndicator={false}
+        style={{ flexGrow: 0 }}
+      />
+
+      <Button text="adicionar conta" onPress={() => router.push('/(open-finance)/link-account')} />
+    </View>
   );
 }
 
@@ -87,6 +88,8 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     paddingVertical: 12,
+    backgroundColor: '#fff',
+    zIndex: -2,
   },
   header: {
     position: 'relative',

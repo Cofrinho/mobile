@@ -1,28 +1,42 @@
 import Colors from '@/constants/colors';
-import { Image, Text, View } from 'react-native';
+import { Image, Text, TouchableOpacity, TouchableOpacityProps, View } from 'react-native';
 import MoneyText from './MoneyText';
 
-type props = {
+type props = TouchableOpacityProps & {
   logo: string;
   name: string;
   agency: string;
   account: string;
   amount: number;
+  selected: boolean;
 };
 
-export default function OFAccountCard({ logo, name, agency, account, amount }: props) {
+export default function SelectOFAccount({
+  logo,
+  name,
+  agency,
+  account,
+  amount,
+  selected,
+  ...props
+}: props) {
   return (
-    <View
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderRadius: 12,
-        borderColor: Colors.primary,
-        padding: 12,
-      }}
+    <TouchableOpacity
+      style={[
+        {
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderWidth: 1,
+          borderRadius: 12,
+          borderColor: Colors.primary,
+          padding: 12,
+        },
+        selected ? { backgroundColor: Colors.secondary } : null,
+      ]}
+      {...props}
+      activeOpacity={1}
     >
       <View
         style={{
@@ -50,6 +64,6 @@ export default function OFAccountCard({ logo, name, agency, account, amount }: p
       </View>
 
       <MoneyText amount={amount} color={Colors.black} size={16} />
-    </View>
+    </TouchableOpacity>
   );
 }
