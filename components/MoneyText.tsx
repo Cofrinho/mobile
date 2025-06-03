@@ -2,7 +2,7 @@ import { Text, TextProps } from 'react-native';
 
 type props = TextProps & {
   amount: number;
-  color: string;
+  color?: string;
   size: number;
   showMoney?: boolean;
 };
