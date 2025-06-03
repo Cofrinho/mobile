@@ -3,6 +3,7 @@ import CircleIconButton from '@/components/CircleIconButton';
 import GroupCard from '@/components/GroupCard';
 import Input from '@/components/Input';
 import Colors from '@/constants/colors';
+import { router } from 'expo-router';
 import { Plus, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -39,7 +40,7 @@ export default function Groups() {
       title={item.title}
       members={item.members}
       image={item.image}
-      href={`../../group/${item.id}`}
+      onPress={() => router.push({ pathname: '/group', params: { id: item.id } })}
     />
   );
   return (
