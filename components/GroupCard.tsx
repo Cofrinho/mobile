@@ -6,12 +6,12 @@ interface GroupCardProps {
   title: string;
   members: number;
   image: string;
-  href: string;
+  onPress: () => void;
 }
 
-export default function GroupCard({ title, members, image, href }: GroupCardProps) {
+export default function GroupCard({ title, members, image, onPress }: GroupCardProps) {
   return (
-    <TouchableOpacity style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={onPress}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View>
           <Image source={{ uri: image }} style={styles.image} />
