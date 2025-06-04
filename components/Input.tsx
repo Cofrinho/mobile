@@ -6,9 +6,10 @@ import { StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View } f
 type Props = TextInputProps & {
   placeholder: string;
   isPassword?: boolean;
+  icon?: React.ReactNode;
 };
 
-export default function Input({ placeholder, isPassword, ...props }: Props) {
+export default function Input({ placeholder, isPassword, icon, ...props }: Props) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -27,6 +28,12 @@ export default function Input({ placeholder, isPassword, ...props }: Props) {
           activeOpacity={0.7}
         >
           <Text style={styles.toggleButtonText}>{showPassword ? <EyeOff /> : <Eye />}</Text>
+        </TouchableOpacity>
+      )}
+
+      {icon && (
+        <TouchableOpacity style={styles.toggleButton} activeOpacity={1}>
+          <Text style={styles.toggleButtonText}>{icon}</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -53,7 +60,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     top: '50%',
-    transform: [{ translateY: -12 }],
+    transform: [{ translateY: -16 }],
   },
   toggleButtonText: {
     color: Colors.primary,

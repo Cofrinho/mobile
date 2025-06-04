@@ -1,16 +1,45 @@
 import Colors from '@/constants/colors';
+import React from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 interface props {
   text: string;
-  href?: string;
   onPress?: VoidFunction;
+  icon?: React.ReactNode;
+  color?: string;
+  textColor?: string;
+  center?: boolean;
+  uppercase?: boolean;
 }
 
-export default function Button({ text, href, onPress }: props) {
+export default function Button({
+  text,
+  onPress,
+  icon,
+  color,
+  textColor,
+  center = true,
+  uppercase = true,
+}: props) {
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
-      <Text style={styles.text}>{text}</Text>
+    <TouchableOpacity
+      style={[
+        styles.button,
+        color ? { backgroundColor: color } : { backgroundColor: Colors.primary },
+        center ? { justifyContent: 'center' } : { justifyContent: 'flex-start' },
+      ]}
+      onPress={onPress}
+    >
+      {icon}
+      <Text
+        style={[
+          styles.text,
+          textColor ? { color: textColor } : { color: '#fff' },
+          uppercase ? { textTransform: 'uppercase' } : null,
+        ]}
+      >
+        {text}
+      </Text>
     </TouchableOpacity>
   );
 }
@@ -19,16 +48,15 @@ const styles = StyleSheet.create({
   button: {
     padding: 14,
     borderRadius: 8,
-    backgroundColor: Colors.primary,
     display: 'flex',
-    justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
+    gap: 4,
+    flexDirection: 'row',
   },
   text: {
     color: Colors.secondary,
     fontSize: 16,
     fontWeight: 'bold',
-    textTransform: 'uppercase',
   },
 });

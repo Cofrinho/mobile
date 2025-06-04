@@ -10,7 +10,7 @@ export function Navbar({ state, descriptors, navigation }: BottomTabBarProps) {
   const tabs = [
     { name: 'account/index', icon: <DollarSign color={Colors.primary} /> },
     {
-      name: 'addFunds/index',
+      name: 'add-funds/index',
       icon: <Plus color={'#fff'} style={styles.addFundsIcon} width={40} height={40} />,
     },
     { name: 'groups/index', icon: <UsersRound color={Colors.primary} /> },

@@ -1,8 +1,11 @@
 import Colors from '@/constants/colors';
+import { useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
 import { Image, Text, TouchableOpacity, TouchableOpacityProps, View } from 'react-native';
 
 export default function OFCard({ ...props }: TouchableOpacityProps) {
+  const router = useRouter();
+
   return (
     <TouchableOpacity
       style={{
@@ -14,6 +17,8 @@ export default function OFCard({ ...props }: TouchableOpacityProps) {
         display: 'flex',
         justifyContent: 'center',
       }}
+      activeOpacity={1}
+      onPress={() => router.push('/(open-finance)/open-finance')}
     >
       <View
         style={{
