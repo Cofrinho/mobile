@@ -39,6 +39,7 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" options={{ headerShown: false, animation: 'none' }} />
         <Stack.Screen name="group" options={{ headerShown: false }} />
         <Stack.Screen name="addGroup" options={{ headerShown: false }} />
+        <Stack.Screen name="groupMembers" options={{ headerShown: false }} />
         <Stack.Screen name="notifications" options={{ headerShown: false }} />
         <Stack.Screen name="transactions" options={{ headerShown: false }} />
       </Stack>
