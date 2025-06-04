@@ -85,9 +85,7 @@ export default function GroupDetails() {
           />
         )}
         <View style={styles.participants}>
-          <Users2 size={20} color={Colors.primary}>
-            {groupArray.participants}
-          </Users2>
+          <Users2 size={20} color={Colors.primary} />
           <Text style={styles.participantCount}>{groupArray.participants}</Text>
         </View>
       </View>
