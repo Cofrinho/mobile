@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity } from 'react-native';
 
 interface props {
   active: boolean;
-  onPress: VoidFunction;
+  onPress?: VoidFunction;
 }
 
 export default function Stepper({ active, onPress }: props) {

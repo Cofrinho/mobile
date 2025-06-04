@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
 
 type Props = TextInputProps & {
-  placeholder: string;
+  placeholder?: string;
   isPassword?: boolean;
   icon?: React.ReactNode;
 };

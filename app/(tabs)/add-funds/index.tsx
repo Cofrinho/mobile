@@ -8,7 +8,7 @@ import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'reac
 export default function AddFunds() {
   const router = useRouter();
 
-  const [ofSelected, setOfSelected] = useState(false);
+  const [ofSelected, setOfSelected] = useState(true);
 
   const [rawValue, setRawValue] = useState(''); // cents
 

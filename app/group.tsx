@@ -96,7 +96,7 @@ export default function GroupDetails() {
         <View style={styles.groupInfo}>
           <Text style={[styles.title, { marginBottom: 20 }]}>{groupArray.name}</Text>
           {isGroupOwner ? (
-            <Button text="Criar despesa" onPress={() => console.log('Criar despesa')} />
+            <Button text="Criar despesa" onPress={() => router.push('/(expense)/create-expense')} />
           ) : (
             <View style={styles.organizerBox}>
               <Image source={{ uri: groupArray.organizer.avatar }} style={styles.avatar} />
@@ -198,6 +198,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.secondary,
     padding: 8,
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.primary,
   },
   participantCount: {
     fontWeight: 'bold',
