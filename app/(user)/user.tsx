@@ -1,9 +1,10 @@
 import Button from '@/components/Button';
 import CircleIconButton from '@/components/CircleIconButton';
 import Colors from '@/constants/colors';
+import { AuthContext } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { History, LogOut, Pencil, Trash, Undo2, X } from 'lucide-react-native';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const user = {
@@ -14,6 +15,7 @@ const user = {
 
 export default function User() {
   const router = useRouter();
+  const { logout } = useContext(AuthContext);
 
   const [deleteAccountModal, setDeleteAccountModal] = useState(false);
 
@@ -101,7 +103,10 @@ export default function User() {
                   icon={<LogOut size={20} />}
                   color={Colors.lightGray2}
                   textColor={Colors.black}
-                  onPress={() => router.push('/(auth)/login')}
+                  onPress={() => {
+                    logout();
+                    router.push('/(auth)/login');
+                  }}
                 />
               </View>
             </View>

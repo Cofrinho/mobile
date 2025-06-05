@@ -3,8 +3,11 @@ import RoundedButton from '@/components/RoundedButton';
 import RoundedInput from '@/components/RoundedInput';
 import Subtitle from '@/components/Subtitle';
 import Colors from '@/constants/colors';
+import { AuthContext } from '@/contexts/AuthContext';
+import authService from '@/services/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
+import { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { z } from 'zod';
@@ -19,6 +22,8 @@ type FormData = z.infer<typeof loginFormSchema>;
 export default function Login() {
   const router = useRouter();
 
+  const { login, loading } = useContext(AuthContext);
+
   const {
     register,
     setValue,
@@ -29,9 +34,19 @@ export default function Login() {
     resolver: zodResolver(loginFormSchema),
   });
 
+  const [responseError, setResponseError] = useState('' as string);
+
   const onSubmit = async (data: FormData) => {
-    // TODO: enviar dados para o back-end validar e fazer a lógica de autenticação baseada na resposta
-    console.log(data);
+    try {
+      await login(data.email, data.password);
+      setResponseError('');
+      router.push('/(tabs)/account');
+    } catch (error: any) {
+      const apiMessage =
+        error?.response?.data?.error ?? error?.message ?? 'Erro inesperado. Tente novamente.';
+
+      setResponseError(apiMessage);
+    }
   };
 
   const password = watch('password');
@@ -85,6 +100,7 @@ export default function Login() {
         </View>
 
         <View style={styles.formButtonContainer}>
+          {responseError && <Text style={{ color: Colors.red }}>{responseError}</Text>}
           <RoundedButton text="LOGIN" onPress={handleSubmit(onSubmit)} />
           <TouchableOpacity onPress={() => router.push('/forgot-password')}>
             <Text style={styles.text}>Esqueceu sua senha?</Text>
