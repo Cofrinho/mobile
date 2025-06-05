@@ -38,8 +38,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       let accessToken = await AsyncStorage.getItem('Cofrinho.accessToken');
       const refreshToken = await SecureStore.getItemAsync('Cofrinho.refreshToken');
 
-      console.log(accessToken);
-
       if (!accessToken || !refreshToken) {
         setIsAuthenticated(false);
         return;
