@@ -10,7 +10,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   async (config) => {
-    const token = await AsyncStorage.getItem('@Cofrinho:accessToken');
+    const token = await AsyncStorage.getItem('Cofrinho.accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

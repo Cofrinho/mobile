@@ -18,7 +18,6 @@ interface AuthContextData {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  refreshAccessToken: () => Promise<boolean>;
 }
 
 export const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -26,50 +25,44 @@ export const AuthContext = createContext<AuthContextData>({} as AuthContextData)
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const isAuthenticated = !!user;
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const clearStorageAndLogout = async () => {
-    await AsyncStorage.multiRemove(['Cofrinho.accessToken', 'Cofrinho.user']);
+    await AsyncStorage.multiRemove(['Cofrinho.accessToken']);
     await SecureStore.deleteItemAsync('Cofrinho.refreshToken');
     setUser(null);
   };
 
-  const refreshAccessToken = async (): Promise<boolean> => {
+  const checkAuth = async () => {
     try {
+      let accessToken = await AsyncStorage.getItem('Cofrinho.accessToken');
       const refreshToken = await SecureStore.getItemAsync('Cofrinho.refreshToken');
-      if (!refreshToken) {
-        await clearStorageAndLogout();
-        return false;
+
+      if (!accessToken || !refreshToken) {
+        setIsAuthenticated(false);
+        return;
       }
 
-      const refreshResponse = await authService.refreshToken(refreshToken);
-
-      await AsyncStorage.setItem('Cofrinho.accessToken', refreshResponse.accessToken);
-
-      if (refreshResponse.refreshToken) {
-        await SecureStore.setItemAsync('Cofrinho.refreshToken', refreshResponse.refreshToken);
-      }
-
-      return true;
-    } catch {
-      await clearStorageAndLogout();
-      return false;
-    }
-  };
-
-  const loadUserFromStorage = async () => {
-    try {
-      const accessToken = await AsyncStorage.getItem('Cofrinho.accessToken');
-      if (!accessToken) {
-        setUser(null);
+      if (!accessToken && !refreshToken) {
+        setIsAuthenticated(false);
         return;
       }
 
       const me = await authService.me();
+
       setUser(me);
-      await AsyncStorage.setItem('Cofrinho.user', JSON.stringify(me));
-    } catch {
+      setIsAuthenticated(true);
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        const refreshToken = await SecureStore.getItemAsync('Cofrinho.accessToken');
+
+        if (refreshToken) {
+          await authService.refreshToken(refreshToken);
+          setIsAuthenticated(true);
+        }
+      }
+
+      setIsAuthenticated(false);
       await clearStorageAndLogout();
     } finally {
       setLoading(false);
@@ -77,7 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    loadUserFromStorage();
+    checkAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -88,7 +81,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       const me = await authService.me();
       setUser(me);
-      await AsyncStorage.setItem('Cofrinho.user', JSON.stringify(me));
     } catch (error) {
       throw error;
     } finally {
@@ -108,7 +100,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         loading,
         login,
         logout,
-        refreshAccessToken,
       }}
     >
       {children}

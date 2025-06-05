@@ -40,11 +40,12 @@ export default function Login() {
     try {
       await login(data.email, data.password);
       setResponseError('');
-
       router.push('/(tabs)/account');
     } catch (error: any) {
-      console.error(error);
-      setResponseError(error.response.data.error);
+      const apiMessage =
+        error?.response?.data?.error ?? error?.message ?? 'Erro inesperado. Tente novamente.';
+
+      setResponseError(apiMessage);
     }
   };
 

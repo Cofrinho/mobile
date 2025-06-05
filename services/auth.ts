@@ -25,6 +25,10 @@ const authService = {
 
   refreshToken: async (refreshToken: string) => {
     const response = await api.post('/refresh', { refreshToken });
+    const data = response.data as { accessToken: string };
+
+    await AsyncStorage.setItem('Cofrinho.accessToken', data.accessToken);
+
     return response.data;
   },
 };
