@@ -6,7 +6,7 @@ import Colors from '@/constants/colors';
 import { router, useLocalSearchParams } from 'expo-router';
 import { LogOut, Pencil, Trash, Undo2, UserRoundPlus, Users2 } from 'lucide-react-native';
 import { useState } from 'react';
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const groupArray = {
@@ -36,7 +36,11 @@ interface Expense {
 export default function GroupDetails() {
   const { id } = useLocalSearchParams() as { id: string };
   const [modalVisible, setModalVisible] = useState(false);
-  const renderItem = ({ item }: { item: Expense }) => <ExpensiveCard expensive={item} />;
+  const renderItem = ({ item }: { item: Expense }) => (
+    <TouchableOpacity onPress={() => router.push(`/(expense)/expense/${item.id}`)}>
+      <ExpensiveCard expensive={item} />
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -85,9 +89,7 @@ export default function GroupDetails() {
           />
         )}
         <View style={styles.participants}>
-          <Users2 size={20} color={Colors.primary}>
-            {groupArray.participants}
-          </Users2>
+          <Users2 size={20} color={Colors.primary}></Users2>
           <Text style={styles.participantCount}>{groupArray.participants}</Text>
         </View>
       </View>
