@@ -88,10 +88,11 @@ export default function GroupDetails() {
             onPress={() => console.log('Sair')}
           />
         )}
-        <View style={styles.participants}>
-          <Users2 size={20} color={Colors.primary}></Users2>
+
+        <TouchableOpacity style={styles.participants} onPress={() => router.push('/groupMembers')}>
+          <Users2 size={20} color={Colors.primary} />
           <Text style={styles.participantCount}>{groupArray.participants}</Text>
-        </View>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.content}>

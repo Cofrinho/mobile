@@ -4,20 +4,16 @@ import NotificationButton from '@/components/NotificationButton';
 import OFCard from '@/components/OFCard';
 import TransactionCard from '@/components/TransactionCard';
 import Colors from '@/constants/colors';
+import { AuthContext } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { ChevronRight, Eye, EyeClosed, Plus } from 'lucide-react-native';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-const user = {
-  avatar: '',
-  name: 'Usuário da Silva',
-  cofrinhoBalance: 1349,
-  openFinanceBalance: 3412,
-};
 
 export default function Page() {
   const router = useRouter();
+
+  const { user, isAuthenticated } = useContext(AuthContext);
 
   const [showBalance, setShowBalance] = useState(true);
 
@@ -30,14 +26,14 @@ export default function Page() {
           onPress={() => router.push('/(user)/user')}
         >
           <View style={styles.userAvatarContainer}>
-            {user.avatar ? (
-              <Image src={user.avatar} />
+            {user?.avatar_url ? (
+              <Image src={user?.avatar_url} />
             ) : (
-              <Text style={styles.avatarFallback}>{user.name[0]}</Text>
+              <Text style={styles.avatarFallback}>{user?.name[0]}</Text>
             )}
           </View>
 
-          <Text style={styles.username}>{user.name}</Text>
+          <Text style={styles.username}>{user?.name}</Text>
         </TouchableOpacity>
 
         <NotificationButton quantity={4} onPress={() => router.push('/notifications')} />
@@ -46,7 +42,7 @@ export default function Page() {
       <View style={styles.welcomeAndEyeContainer}>
         <View>
           <Text style={styles.welcomeText}>Bem vindo de volta!</Text>
-          <Text style={styles.helloUserText}>Olá, {user.name.split(' ', 1)[0]}!</Text>
+          <Text style={styles.helloUserText}>Olá, {user?.name.split(' ', 1)[0]}!</Text>
         </View>
 
         <CircleIconButton
@@ -68,7 +64,7 @@ export default function Page() {
       <View style={styles.cofrinhoBalanceContainer}>
         <View style={{ gap: 2 }}>
           <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>Saldo no cofrinho</Text>
-          <MoneyText showMoney={showBalance} amount={user.cofrinhoBalance} size={28} color="#fff" />
+          <MoneyText showMoney={showBalance} amount={1349} size={28} color="#fff" />
         </View>
 
         <CircleIconButton
@@ -122,12 +118,7 @@ export default function Page() {
           </View>
         </View>
 
-        <MoneyText
-          showMoney={showBalance}
-          amount={user.openFinanceBalance}
-          color={Colors.black}
-          size={28}
-        />
+        <MoneyText showMoney={showBalance} amount={3412} color={Colors.black} size={28} />
       </TouchableOpacity>
 
       <OFCard />

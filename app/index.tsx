@@ -1,9 +1,18 @@
+import { AuthContext } from '@/contexts/AuthContext';
 import { Redirect } from 'expo-router';
-import { useState } from 'react';
+import { useContext } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 
 export default function Page() {
-  // fake auth state to control auth screens render
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const { isAuthenticated, loading } = useContext(AuthContext);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return isAuthenticated ? (
     <Redirect href={'/(tabs)/account'} />

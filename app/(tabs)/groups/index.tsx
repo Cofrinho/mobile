@@ -55,7 +55,12 @@ export default function Groups() {
           }}
         >
           <Text style={styles.title}>Grupos</Text>
-          <CircleIconButton icon={<Plus color="#FFFFFF" />} color={Colors.primary} border={false} />
+          <CircleIconButton
+            icon={<Plus color="#FFFFFF" />}
+            color={Colors.primary}
+            border={false}
+            onPress={() => router.push('/addGroup')}
+          />
         </View>
         <FlatList
           data={groupsArray}

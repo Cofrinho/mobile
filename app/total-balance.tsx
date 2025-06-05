@@ -4,7 +4,8 @@ import OFAccountCard from '@/components/OFAccountCard';
 import Colors from '@/constants/colors';
 import { useRouter } from 'expo-router';
 import { Undo2 } from 'lucide-react-native';
-import { FlatList, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const accounts = [
   {

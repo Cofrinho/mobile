@@ -1,3 +1,4 @@
+import { AuthProvider } from '@/contexts/AuthContext';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -32,20 +33,24 @@ export default function RootLayout() {
   if (!appIsReady) return null;
 
   return (
-    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-      <StatusBar style="dark" />
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: 'none' }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false, animation: 'none' }} />
-        <Stack.Screen name="group" options={{ headerShown: false }} />
-        <Stack.Screen name="notifications" options={{ headerShown: false }} />
-        <Stack.Screen name="transactions" options={{ headerShown: false }} />
-        <Stack.Screen name="total-balance" options={{ headerShown: false }} />
-        <Stack.Screen name="(user)" options={{ headerShown: false }} />
-        <Stack.Screen name="(open-finance)" options={{ headerShown: false }} />
-        <Stack.Screen name="(bank-app)" options={{ headerShown: false }} />
-        <Stack.Screen name="(expense)" options={{ headerShown: false }} />
-      </Stack>
-    </View>
+    <AuthProvider>
+      <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+        <StatusBar style="dark" />
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: 'none' }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false, animation: 'none' }} />
+          <Stack.Screen name="group" options={{ headerShown: false }} />
+          <Stack.Screen name="addGroup" options={{ headerShown: false }} />
+          <Stack.Screen name="groupMembers" options={{ headerShown: false }} />
+          <Stack.Screen name="notifications" options={{ headerShown: false }} />
+          <Stack.Screen name="transactions" options={{ headerShown: false }} />
+          <Stack.Screen name="total-balance" options={{ headerShown: false }} />
+          <Stack.Screen name="(user)" options={{ headerShown: false }} />
+          <Stack.Screen name="(open-finance)" options={{ headerShown: false }} />
+          <Stack.Screen name="(bank-app)" options={{ headerShown: false }} />
+          <Stack.Screen name="(expense)" options={{ headerShown: false }} />
+        </Stack>
+      </View>
+    </AuthProvider>
   );
 }
