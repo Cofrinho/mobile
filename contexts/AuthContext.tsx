@@ -38,6 +38,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       let accessToken = await AsyncStorage.getItem('Cofrinho.accessToken');
       const refreshToken = await SecureStore.getItemAsync('Cofrinho.refreshToken');
 
+      console.log(accessToken);
+
       if (!accessToken || !refreshToken) {
         setIsAuthenticated(false);
         return;
@@ -54,16 +56,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsAuthenticated(true);
     } catch (error: any) {
       if (error.response?.status === 401) {
-        const refreshToken = await SecureStore.getItemAsync('Cofrinho.accessToken');
+        const refreshToken = await SecureStore.getItemAsync('Cofrinho.refreshToken');
 
         if (refreshToken) {
           await authService.refreshToken(refreshToken);
+
+          const me = await authService.me();
+          setUser(me);
+
           setIsAuthenticated(true);
+          return;
         }
       }
 
       setIsAuthenticated(false);
-      await clearStorageAndLogout();
     } finally {
       setLoading(false);
     }
