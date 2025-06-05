@@ -36,7 +36,11 @@ interface Expense {
 export default function GroupDetails() {
   const { id } = useLocalSearchParams() as { id: string };
   const [modalVisible, setModalVisible] = useState(false);
-  const renderItem = ({ item }: { item: Expense }) => <ExpensiveCard expensive={item} />;
+  const renderItem = ({ item }: { item: Expense }) => (
+    <TouchableOpacity onPress={() => router.push(`/(expense)/expense/${item.id}`)}>
+      <ExpensiveCard expensive={item} />
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -84,6 +88,7 @@ export default function GroupDetails() {
             onPress={() => console.log('Sair')}
           />
         )}
+
         <TouchableOpacity style={styles.participants} onPress={() => router.push('/groupMembers')}>
           <Users2 size={20} color={Colors.primary} />
           <Text style={styles.participantCount}>{groupArray.participants}</Text>
@@ -94,7 +99,7 @@ export default function GroupDetails() {
         <View style={styles.groupInfo}>
           <Text style={[styles.title, { marginBottom: 20 }]}>{groupArray.name}</Text>
           {isGroupOwner ? (
-            <Button text="Criar despesa" onPress={() => console.log('Criar despesa')} />
+            <Button text="Criar despesa" onPress={() => router.push('/(expense)/create-expense')} />
           ) : (
             <View style={styles.organizerBox}>
               <Image source={{ uri: groupArray.organizer.avatar }} style={styles.avatar} />
@@ -196,6 +201,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.secondary,
     padding: 8,
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.primary,
   },
   participantCount: {
     fontWeight: 'bold',

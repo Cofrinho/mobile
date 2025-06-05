@@ -48,6 +48,7 @@ export default function RootLayout() {
           <Stack.Screen name="(user)" options={{ headerShown: false }} />
           <Stack.Screen name="(open-finance)" options={{ headerShown: false }} />
           <Stack.Screen name="(bank-app)" options={{ headerShown: false }} />
+          <Stack.Screen name="(expense)" options={{ headerShown: false }} />
         </Stack>
       </View>
     </AuthProvider>
