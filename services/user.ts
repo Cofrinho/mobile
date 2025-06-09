@@ -11,7 +11,6 @@ interface User {
 
 const userService = {
   register: async (user: User) => {
-    console.log('Registering user:', user);
     const response = await api.post('/register', user);
     return response.data;
   },
