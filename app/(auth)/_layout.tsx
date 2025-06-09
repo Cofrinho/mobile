@@ -5,12 +5,12 @@ import { ChevronLeft } from 'lucide-react-native';
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AuthLayout() {
   const router = useRouter();
