@@ -1,7 +1,8 @@
-import { createContext, useEffect, useState } from 'react';
+import authService from '@/services/auth';
+import userService from '@/services/user';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
-import authService from '@/services/auth';
+import { createContext, useEffect, useState } from 'react';
 
 interface User {
   id: number;
@@ -18,6 +19,7 @@ interface AuthContextData {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  register: (userData: any) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -96,6 +98,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await clearStorageAndLogout();
   };
 
+  const register = async (userData: any) => {
+    try {
+      setLoading(true);
+      const response = await userService.register(userData);
+      setUser(response);
+      setIsAuthenticated(true);
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -104,6 +119,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         loading,
         login,
         logout,
+        register,
       }}
     >
       {children}
