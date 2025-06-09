@@ -3,43 +3,51 @@ import CircleIconButton from '@/components/CircleIconButton';
 import GroupCard from '@/components/GroupCard';
 import Input from '@/components/Input';
 import Colors from '@/constants/colors';
-import { router } from 'expo-router';
+import groupService from '@/services/group';
+import { router, useFocusEffect } from 'expo-router';
 import { Plus, X } from 'lucide-react-native';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const groupsArray = [
-  {
-    id: '1',
-    title: 'Churrascada',
-    members: 7,
-    image:
-      'https://minervafoods.com/wp-content/uploads/2023/02/Acompanhamento-para-churrasco-confira-8-opcoes-saborosas-scaled.jpg',
-  },
-  {
-    id: '2',
-    title: 'Viagem praia',
-    members: 12,
-    image: 'https://static.ndmais.com.br/2023/12/praia-tropical-com-areia-branca-scaled.jpg',
-  },
-];
-
 interface Group {
   id: string;
-  title: string;
-  members: number;
+  name: string;
+  members: number | string;
   image: string;
 }
 
 export default function Groups() {
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [groups, setGroups] = useState<Group[]>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchGroups = async () => {
+        try {
+          setLoading(true);
+          const response = await groupService.getAll();
+          setGroups(response);
+        } catch (error) {
+          console.error('Error fetching groups:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchGroups();
+    }, []),
+  );
 
   const renderItem = ({ item }: { item: Group }) => (
     <GroupCard
-      title={item.title}
-      members={item.members}
-      image={item.image}
+      title={item.name}
+      members={typeof item.members === 'number' ? item.members : 0}
+      image={
+        item.image
+          ? item.image
+          : 'https://peqengenhariajr.com.br/wp-content/uploads/2021/03/dinamica-de-grupo.jpg'
+      }
       onPress={() => router.push({ pathname: '/group', params: { id: item.id } })}
     />
   );
@@ -62,13 +70,21 @@ export default function Groups() {
             onPress={() => router.push('/addGroup')}
           />
         </View>
-        <FlatList
-          data={groupsArray}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={{ gap: 4 }}
-          showsVerticalScrollIndicator={false}
-        />
+        {loading ? (
+          <Text>Carregando grupos...</Text>
+        ) : groups.length === 0 ? (
+          <Text style={{ textAlign: 'center', marginTop: 20 }}>
+            Você ainda não está em nenhum grupo. Crie ou entre em um grupo!
+          </Text>
+        ) : (
+          <FlatList
+            data={groups}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={{ gap: 4 }}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
       </View>
       <Button text="Entrar em um grupo" onPress={() => setModalVisible(true)} />
       <Modal
