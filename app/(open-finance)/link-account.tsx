@@ -1,36 +1,51 @@
 import CircleIconButton from '@/components/CircleIconButton';
+import ErrorText from '@/components/ErrorText';
 import Input from '@/components/Input';
 import OFInstitutionCard from '@/components/OFInstitutionCard';
+import RequestErrorText from '@/components/RequestErrorText';
 import Colors from '@/constants/colors';
+import institutionService from '@/services/institutions';
 import { useRouter } from 'expo-router';
-import { Search, Undo2 } from 'lucide-react-native';
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
-
-const institutions = [
-  {
-    id: '1',
-    name: 'Nubank',
-    logo: 'https://cdn-1.webcatalog.io/catalog/nubank/nubank-icon-filled-256.png?v=1745196590866',
-  },
-  {
-    id: '2',
-    name: 'Itaú',
-    logo: 'https://designconceitual.com.br/wp-content/uploads/2023/12/Ita%C3%BA-novo-logotipo-2023-1000x600.jpg',
-  },
-];
+import { Info, Search, TriangleAlert, Undo2 } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, View } from 'react-native';
 
 interface institution {
-  id: string;
+  id: number;
   name: string;
-  logo: string;
+  api_url: string;
+  logo_url: string;
+  color: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function LinkAccount() {
   const router = useRouter();
 
+  const [institutions, setInstitutions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState();
+
+  useEffect(() => {
+    const fetchInstitutions = async () => {
+      try {
+        const data = await institutionService.findAll();
+        setInstitutions(data);
+        return data;
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInstitutions();
+  }, []);
+
   const renderItem = ({ item }: { item: institution }) => (
     <OFInstitutionCard
-      logo={item.logo}
+      logo={item.logo_url}
       name={item.name}
       onPress={() => router.push(`/(open-finance)/link-expiration/${item.id}`)}
     />
@@ -64,15 +79,21 @@ export default function LinkAccount() {
         </View>
 
         <View>
-          <FlatList
-            data={institutions}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            contentContainerStyle={{ paddingVertical: 12 }}
-            ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-            showsVerticalScrollIndicator={false}
-            style={{ flexGrow: 0 }}
-          />
+          {!loading && !error && institutions && (
+            <FlatList
+              data={institutions}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderItem}
+              contentContainerStyle={{ paddingVertical: 12 }}
+              ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+              showsVerticalScrollIndicator={false}
+              style={{ flexGrow: 0 }}
+            />
+          )}
+
+          {loading && !error && <ActivityIndicator />}
+
+          {error && !loading && <RequestErrorText text={error} />}
         </View>
       </View>
     </View>
