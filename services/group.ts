@@ -12,8 +12,8 @@ const groupService = {
     const response = await api.post('/groups', group);
     return response.data;
   },
-  getAll: async () => {
-    const response = await api.get('/groups');
+  getAllByUser: async (userId: number) => {
+    const response = await api.get(`/groups/user/${userId}`);
     return response.data;
   },
 };

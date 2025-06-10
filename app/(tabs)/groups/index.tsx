@@ -3,54 +3,70 @@ import CircleIconButton from '@/components/CircleIconButton';
 import GroupCard from '@/components/GroupCard';
 import Input from '@/components/Input';
 import Colors from '@/constants/colors';
+import { AuthContext } from '@/contexts/AuthContext';
 import groupService from '@/services/group';
 import { router, useFocusEffect } from 'expo-router';
 import { Plus, X } from 'lucide-react-native';
-import { useCallback, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface Group {
-  id: string;
-  name: string;
-  members: number | string;
-  image: string;
+  group: {
+    id: string;
+    name: string;
+    image_url?: string;
+  };
+  participants?: Array<{
+    id: string;
+    user_id: string;
+  }>;
 }
 
 export default function Groups() {
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
+  const { user } = useContext(AuthContext);
 
   useFocusEffect(
     useCallback(() => {
       const fetchGroups = async () => {
+        setLoading(true);
         try {
-          setLoading(true);
-          const response = await groupService.getAll();
+          if (!user) {
+            console.error('Usuário não autenticado.');
+            setGroups([]);
+            return;
+          }
+          const response = await groupService.getAllByUser(user.id);
           setGroups(response);
         } catch (error) {
           console.error('Error fetching groups:', error);
+          setGroups([]);
         } finally {
           setLoading(false);
         }
       };
       fetchGroups();
-    }, []),
+    }, [user]),
   );
 
-  const renderItem = ({ item }: { item: Group }) => (
-    <GroupCard
-      title={item.name}
-      members={typeof item.members === 'number' ? item.members : 0}
-      image={
-        item.image
-          ? item.image
-          : 'https://peqengenhariajr.com.br/wp-content/uploads/2021/03/dinamica-de-grupo.jpg'
-      }
-      onPress={() => router.push({ pathname: '/group', params: { id: item.id } })}
-    />
-  );
+  const renderItem = ({ item }: { item: Group }) => {
+    return (
+      <GroupCard
+        title={item.group.name}
+        members={item.participants?.length ?? 0}
+        image={
+          item.group.image_url
+            ? item.group.image_url
+            : 'https://peqengenhariajr.com.br/wp-content/uploads/2021/03/dinamica-de-grupo.jpg'
+        }
+        onPress={() => router.push({ pathname: '/group', params: { id: item.group.id } })}
+      />
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.subcontainer}>
