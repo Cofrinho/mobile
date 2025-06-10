@@ -5,10 +5,37 @@ import OFCard from '@/components/OFCard';
 import TransactionCard from '@/components/TransactionCard';
 import Colors from '@/constants/colors';
 import { AuthContext } from '@/contexts/AuthContext';
+import accountService from '@/services/account';
+import openFinanceService from '@/services/open-finance';
 import { useRouter } from 'expo-router';
 import { ChevronRight, Eye, EyeClosed, Plus } from 'lucide-react-native';
-import { useContext, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useContext, useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  FlatList,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+const openFinanceData = {
+  balance: 3200.75,
+  logos: ['https://bank-account-aggregator.onrender.com/santander-logo.png'],
+};
+
+interface IAccountData {
+  balance: number;
+  notifications: number;
+  transactions: [];
+}
+
+interface IOpenFinanceData {
+  balance: number;
+  logos: [];
+}
 
 export default function Page() {
   const router = useRouter();
@@ -16,6 +43,67 @@ export default function Page() {
   const { user, isAuthenticated } = useContext(AuthContext);
 
   const [showBalance, setShowBalance] = useState(true);
+
+  const [accountData, setAccountData] = useState({} as IAccountData);
+  const [openFinanceData, setOpenFinanceData] = useState({} as IOpenFinanceData);
+  const [hasOpenFinanceConsent, setHasOpenFinanceConsent] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState();
+
+  useEffect(() => {
+    const fetchAccountData = async () => {
+      try {
+        const accountData = await accountService.mountAccountScreen();
+        setAccountData(accountData);
+
+        const openFinanceData = await openFinanceService.getBalanceAndLogos();
+        setHasOpenFinanceConsent(true);
+        setOpenFinanceData(openFinanceData);
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAccountData();
+  }, []);
+
+  const LogoItem = ({ url, index }: { url: string; index: number }) => {
+    const rightOffset = 24 + index * 12;
+
+    return (
+      <Image
+        style={{
+          width: 24,
+          height: 24,
+          borderRadius: 100,
+          position: 'absolute',
+          right: rightOffset,
+        }}
+        source={{ uri: url }}
+      />
+    );
+  };
+
+  const opacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 0.5,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -36,7 +124,10 @@ export default function Page() {
           <Text style={styles.username}>{user?.name}</Text>
         </TouchableOpacity>
 
-        <NotificationButton quantity={4} onPress={() => router.push('/notifications')} />
+        <NotificationButton
+          quantity={accountData?.notifications}
+          onPress={() => router.push('/notifications')}
+        />
       </View>
 
       <View style={styles.welcomeAndEyeContainer}>
@@ -64,7 +155,7 @@ export default function Page() {
       <View style={styles.cofrinhoBalanceContainer}>
         <View style={{ gap: 2 }}>
           <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>Saldo no cofrinho</Text>
-          <MoneyText showMoney={showBalance} amount={1349} size={28} color="#fff" />
+          <MoneyText showMoney={showBalance} amount={accountData?.balance} size={28} color="#fff" />
         </View>
 
         <CircleIconButton
@@ -74,52 +165,47 @@ export default function Page() {
         />
       </View>
 
-      <TouchableOpacity activeOpacity={1} onPress={() => router.push('/total-balance')}>
-        <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 16 }}>
-            Saldo total
-          </Text>
+      {hasOpenFinanceConsent && (
+        <TouchableOpacity activeOpacity={1} onPress={() => router.push('/total-balance')}>
+          <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 16 }}>
+              Saldo total
+            </Text>
 
-          <View>
-            <View style={{ display: 'flex', flexDirection: 'row' }}>
-              <View
-                style={{
-                  backgroundColor: '#ff6200',
-                  width: 24,
-                  height: 24,
-                  borderRadius: 100,
-                  position: 'absolute',
-                  right: 48,
-                }}
-              ></View>
-              <View
-                style={{
-                  backgroundColor: '#9e01db',
-                  width: 24,
-                  height: 24,
-                  borderRadius: 100,
-                  position: 'absolute',
-                  right: 36,
-                }}
-              ></View>
-              <View
-                style={{
-                  backgroundColor: '#60b039',
-                  width: 24,
-                  height: 24,
-                  borderRadius: 100,
-                  position: 'absolute',
-                  right: 24,
-                }}
-              ></View>
+            <View>
+              {openFinanceData && !loading && (
+                <View style={{ display: 'flex', flexDirection: 'row' }}>
+                  {openFinanceData.logos.map((url, index) => (
+                    <LogoItem key={index} url={url} index={index} />
+                  ))}
+                </View>
+              )}
+
+              <ChevronRight color={Colors.primary} size={24} />
             </View>
-
-            <ChevronRight color={Colors.primary} size={24} />
           </View>
-        </View>
 
-        <MoneyText showMoney={showBalance} amount={3412} color={Colors.black} size={28} />
-      </TouchableOpacity>
+          {openFinanceData && !loading ? (
+            <MoneyText
+              showMoney={showBalance}
+              amount={openFinanceData.balance}
+              color={Colors.black}
+              size={28}
+            />
+          ) : (
+            <Animated.View
+              style={{
+                width: '100%',
+                height: 30,
+                backgroundColor: Colors.lightGray2,
+                borderRadius: 10,
+                marginTop: 8,
+                opacity,
+              }}
+            ></Animated.View>
+          )}
+        </TouchableOpacity>
+      )}
 
       <OFCard />
 
