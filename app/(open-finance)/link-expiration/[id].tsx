@@ -8,15 +8,9 @@ import { Undo2 } from 'lucide-react-native';
 import { useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
-const institution = {
-  id: '2',
-  name: 'Itaú',
-  logo: 'https://designconceitual.com.br/wp-content/uploads/2023/12/Ita%C3%BA-novo-logotipo-2023-1000x600.jpg',
-};
-
 export default function LinkExpiration() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const { id, name, logo } = useLocalSearchParams();
 
   const [expirationTimeValue, setExpirationTimeValue] = useState('option1');
 
@@ -31,7 +25,7 @@ export default function LinkExpiration() {
 
         <View style={styles.titleContainer}>
           <Image
-            source={require('../../../assets/images/open-finance.png')}
+            source={require('@/assets/images/open-finance.png')}
             style={{ width: 24, height: 24 }}
           />
 
@@ -44,9 +38,9 @@ export default function LinkExpiration() {
           <Text style={{ color: Colors.primary, fontWeight: '700' }}>Instituição selecionada</Text>
 
           <OFInstitutionCard
-            logo={institution.logo}
-            id={institution.id}
-            name={institution.name}
+            logo={logo.toString()}
+            id={id.toString()}
+            name={name.toString()}
             showIcon={false}
             activeOpacity={1}
           />

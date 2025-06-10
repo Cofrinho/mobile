@@ -1,3 +1,4 @@
+import AnimatedView from '@/components/AnimatedView';
 import CircleIconButton from '@/components/CircleIconButton';
 import ErrorText from '@/components/ErrorText';
 import Input from '@/components/Input';
@@ -47,7 +48,11 @@ export default function LinkAccount() {
     <OFInstitutionCard
       logo={item.logo_url}
       name={item.name}
-      onPress={() => router.push(`/(open-finance)/link-expiration/${item.id}`)}
+      onPress={() =>
+        router.push(
+          `/(open-finance)/link-expiration/${item.id}?name=${item.name}&logo=${item.logo_url}`,
+        )
+      }
     />
   );
 
@@ -91,7 +96,13 @@ export default function LinkAccount() {
             />
           )}
 
-          {loading && !error && <ActivityIndicator />}
+          {loading && !error && (
+            <View style={{ gap: 8 }}>
+              <AnimatedView width={'100%'} height={70} />
+              <AnimatedView width={'100%'} height={70} />
+              <AnimatedView width={'100%'} height={70} />
+            </View>
+          )}
 
           {error && !loading && <RequestErrorText text={error} />}
         </View>

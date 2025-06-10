@@ -6,9 +6,10 @@ type props = {
   width: DimensionValue;
   height: DimensionValue;
   marginTop?: DimensionValue;
+  marginVertical?: DimensionValue;
 };
 
-export default function AnimatedView({ width, height, marginTop }: props) {
+export default function AnimatedView({ width, height, marginTop, marginVertical }: props) {
   const opacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function AnimatedView({ width, height, marginTop }: props) {
         { width },
         { height },
         { marginTop },
+        { marginVertical },
       ]}
     ></Animated.View>
   );
