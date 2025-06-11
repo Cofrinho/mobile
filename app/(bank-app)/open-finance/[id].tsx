@@ -16,16 +16,10 @@ interface institution {
   updatedAt: string;
 }
 
-const account = {
-  institutionName: 'Banco do Brasil',
-  account: '00458231',
-  agency: '1743',
-};
-
 export default function BankApp() {
   const router = useRouter();
 
-  const { id } = useLocalSearchParams();
+  const { id, account, agency, start, expiration } = useLocalSearchParams();
 
   const [institutions, setInstitutions] = useState([] as institution[]);
   const [loading, setLoading] = useState(true);
@@ -81,16 +75,16 @@ export default function BankApp() {
           />
           <Text style={{ fontWeight: 'bold' }}>Compartilhamento via Open Finance</Text>
         </View>
-        <Text>Instituicão: {account.institutionName}</Text>
-        <Text>Conta: {account.account}</Text>
-        <Text>Agência: {account.agency}</Text>
+        <Text>Instituicão: {institution?.name}</Text>
+        <Text>Conta: {account}</Text>
+        <Text>Agência: {agency}</Text>
       </View>
 
       <Button
         text="COMPARTILHAR DADOS"
         color="#fff"
         textColor="#000"
-        onPress={() => router.push('/(open-finance)/link-successfull/${id}')}
+        onPress={() => router.push(`/(open-finance)/open-finance`)}
       />
     </SafeAreaView>
   );

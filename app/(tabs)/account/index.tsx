@@ -8,9 +8,9 @@ import Colors from '@/constants/colors';
 import { AuthContext } from '@/contexts/AuthContext';
 import accountService from '@/services/account';
 import openFinanceService from '@/services/open-finance';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { ChevronRight, Eye, EyeClosed, Plus } from 'lucide-react-native';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
   Animated,
   FlatList,
@@ -51,24 +51,27 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
 
-  useEffect(() => {
-    const fetchAccountData = async () => {
-      try {
-        const accountData = await accountService.mountAccountScreen();
-        setAccountData(accountData);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchAccountData = async () => {
+        setLoading(true);
+        try {
+          const accountData = await accountService.mountAccountScreen();
+          setAccountData(accountData);
 
-        const openFinanceData = await openFinanceService.getBalanceAndLogos();
-        setHasOpenFinanceConsent(true);
-        setOpenFinanceData(openFinanceData);
-      } catch (error: any) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+          const openFinanceData = await openFinanceService.getBalanceAndLogos();
+          setHasOpenFinanceConsent(true);
+          setOpenFinanceData(openFinanceData);
+        } catch (error: any) {
+          setError(error.message);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-    fetchAccountData();
-  }, []);
+      fetchAccountData();
+    }, []),
+  );
 
   const LogoItem = ({ url, index }: { url: string; index: number }) => {
     const rightOffset = 24 + index * 12;
@@ -81,6 +84,7 @@ export default function Page() {
           borderRadius: 100,
           position: 'absolute',
           right: rightOffset,
+          backgroundColor: '#fff',
         }}
         source={{ uri: url }}
       />

@@ -5,10 +5,12 @@ import Input from '@/components/Input';
 import OFInstitutionCard from '@/components/OFInstitutionCard';
 import RequestErrorText from '@/components/RequestErrorText';
 import Colors from '@/constants/colors';
-import institutionService from '@/services/institutions';
-import { useRouter } from 'expo-router';
+import { AuthContext } from '@/contexts/AuthContext';
+import institutionService, { Institutions } from '@/services/institutions';
+import openFinanceService, { GetAllConsentData } from '@/services/open-finance';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Info, Search, TriangleAlert, Undo2 } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, View } from 'react-native';
 
 interface institution {
@@ -23,26 +25,45 @@ interface institution {
 
 export default function LinkAccount() {
   const router = useRouter();
+  const { user } = useContext(AuthContext);
+  const { hasAccount } = useLocalSearchParams();
 
-  const [institutions, setInstitutions] = useState([]);
+  const [institutions, setInstitutions] = useState([] as Institutions[]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
 
-  useEffect(() => {
-    const fetchInstitutions = async () => {
-      try {
-        const data = await institutionService.findAll();
-        setInstitutions(data);
-        return data;
-      } catch (error: any) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const [alreadyLinkedInstitutions, setAlreadyLinkedInstitutions] = useState<GetAllConsentData[]>(
+    [],
+  );
 
-    fetchInstitutions();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchInstitutions = async () => {
+        try {
+          const data = await institutionService.findAll();
+
+          if (hasAccount == 'true') {
+            const alreadyLinkedIntitutionsData = await openFinanceService.getAllConsents(
+              Number(user?.id),
+            );
+
+            setAlreadyLinkedInstitutions(
+              alreadyLinkedIntitutionsData.filter((consent) => consent.id > 0),
+            );
+          }
+
+          setInstitutions(data);
+          return data;
+        } catch (error: any) {
+          setError(error.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchInstitutions();
+    }, []),
+  );
 
   const renderItem = ({ item }: { item: institution }) => (
     <OFInstitutionCard
@@ -52,6 +73,11 @@ export default function LinkAccount() {
         router.push(
           `/(open-finance)/link-expiration/${item.id}?name=${item.name}&logo=${item.logo_url}`,
         )
+      }
+      alreadyLinked={
+        hasAccount == 'true'
+          ? alreadyLinkedInstitutions.some((consent) => consent.institution_id === item.id)
+          : false
       }
     />
   );
