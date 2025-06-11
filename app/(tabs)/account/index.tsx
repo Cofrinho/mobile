@@ -1,3 +1,4 @@
+import AnimatedView from '@/components/AnimatedView';
 import CircleIconButton from '@/components/CircleIconButton';
 import MoneyText from '@/components/MoneyText';
 import NotificationButton from '@/components/NotificationButton';
@@ -165,7 +166,7 @@ export default function Page() {
         />
       </View>
 
-      {hasOpenFinanceConsent && (
+      {hasOpenFinanceConsent ? (
         <TouchableOpacity activeOpacity={1} onPress={() => router.push('/total-balance')}>
           <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 16 }}>
@@ -205,6 +206,8 @@ export default function Page() {
             ></Animated.View>
           )}
         </TouchableOpacity>
+      ) : (
+        <AnimatedView width={'100%'} height={70}></AnimatedView>
       )}
 
       <OFCard />
