@@ -1,15 +1,20 @@
 import Button from '@/components/Button';
+import institutionService from '@/services/institutions';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const institution = {
-  id: '1',
-  name: 'Nubank',
-  logo: 'https://cdn-1.webcatalog.io/catalog/nubank/nubank-icon-filled-256.png?v=1745196590866',
-  color: '#831bd1',
-};
+interface institution {
+  id: number;
+  name: string;
+  api_url: string;
+  logo_url: string;
+  color: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 const account = {
   institutionName: 'Banco do Brasil',
@@ -22,8 +27,30 @@ export default function BankApp() {
 
   const { id } = useLocalSearchParams();
 
+  const [institutions, setInstitutions] = useState([] as institution[]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState();
+
+  useEffect(() => {
+    const fetchInstitutions = async () => {
+      try {
+        const data = await institutionService.findAll();
+        setInstitutions(data);
+        return data;
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInstitutions();
+  }, []);
+
+  const institution = institutions.find((institution) => institution.id == Number(id));
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: institution.color, gap: 16 }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: institution?.color, gap: 16 }]}>
       <View
         style={{
           display: 'flex',
@@ -35,7 +62,14 @@ export default function BankApp() {
         <ChevronLeft color={'#fff'} onPress={() => router.back()} />
       </View>
 
-      <Image source={{ uri: institution.logo }} width={96} height={96} />
+      {institution && (
+        <Image
+          source={{ uri: institution?.logo_url }}
+          width={96}
+          height={96}
+          style={{ backgroundColor: '#fff', borderRadius: 100 }}
+        />
+      )}
 
       <View
         style={{ width: '100%', backgroundColor: '#fff', padding: 12, borderRadius: 10, gap: 8 }}

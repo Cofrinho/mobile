@@ -1,9 +1,12 @@
+import AnimatedView from '@/components/AnimatedView';
 import Button from '@/components/Button';
 import CircleIconButton from '@/components/CircleIconButton';
 import OFAccountCard from '@/components/OFAccountCard';
 import Colors from '@/constants/colors';
+import openFinanceService from '@/services/open-finance';
 import { useRouter } from 'expo-router';
 import { Undo2 } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
 import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
 
 const accounts = [
@@ -26,22 +29,46 @@ const accounts = [
 ];
 
 interface account {
-  id: string;
-  logo: string;
-  name: string;
-  amount: number;
+  logo_url: string;
+  institutionName: string;
+  balance: number;
   account: string;
   agency: string;
+}
+
+interface totalBalanceResponse {
+  balanceTotal: number;
+  accounts: account[];
 }
 
 export default function OpenFinance() {
   const router = useRouter();
 
+  const [institutions, setInstitutions] = useState({} as totalBalanceResponse);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState();
+
+  useEffect(() => {
+    const fetchInstitutions = async () => {
+      try {
+        const data = await openFinanceService.getDetailedBalance();
+        setInstitutions(data);
+        return data;
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInstitutions();
+  }, []);
+
   const renderItem = ({ item }: { item: account }) => (
     <OFAccountCard
-      logo={item.logo}
-      name={item.name}
-      amount={item.amount}
+      logo={item.logo_url}
+      name={item.institutionName}
+      amount={item.balance}
       account={item.account}
       agency={item.agency}
     />
@@ -68,15 +95,27 @@ export default function OpenFinance() {
 
       <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Contas conectadas</Text>
 
-      <FlatList
-        data={accounts}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={{ paddingVertical: 12 }}
-        ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-        showsVerticalScrollIndicator={false}
-        style={{ flexGrow: 0 }}
-      />
+      {institutions && !loading && !error && (
+        <FlatList
+          data={institutions.accounts}
+          keyExtractor={(item) => item.balance.toString()}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingVertical: 12 }}
+          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+          showsVerticalScrollIndicator={false}
+          style={{ flexGrow: 0 }}
+        />
+      )}
+
+      {loading && <AnimatedView width={'100%'} height={70} marginVertical={12} />}
+
+      {error && (
+        <Text
+          style={{ marginVertical: 12, fontWeight: 'bold', color: Colors.lightGray, fontSize: 16 }}
+        >
+          Nenhuma conta encontrada
+        </Text>
+      )}
 
       <Button text="adicionar conta" onPress={() => router.push('/(open-finance)/link-account')} />
     </View>
