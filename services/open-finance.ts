@@ -65,9 +65,12 @@ const openFinanceService = {
     );
     return data;
   },
-  getAllConsents: async (userId: number): Promise<GetAllConsentData[]> => {
+  getAllConsents: async (userId: number | undefined): Promise<GetAllConsentData[]> => {
     const { data } = await api.get(`/open-finance/users/${userId}/consents`);
     return data;
+  },
+  revokeConsent: async (consentId: number | undefined) => {
+    const { data } = await api.delete(`/open-finance/consents/${consentId}`);
   },
 };
 

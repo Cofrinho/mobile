@@ -1,18 +1,58 @@
 import Button from '@/components/Button';
 import CircleIconButton from '@/components/CircleIconButton';
+import RequestErrorText from '@/components/RequestErrorText';
 import Colors from '@/constants/colors';
+import { AuthContext } from '@/contexts/AuthContext';
+import institutionService from '@/services/institutions';
+import openFinanceService from '@/services/open-finance';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Undo2, X } from 'lucide-react-native';
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function LinkSuccessfull() {
   const router = useRouter();
   const { id, logo, institution, expiration, start } = useLocalSearchParams();
 
+  const { user } = useContext(AuthContext);
+
   const [linkCancelModal, setLinkCancelModal] = useState(false);
 
   const [expirationTimeValue, setExpirationTimeValue] = useState('option1');
+
+  const [consentData, setConsentData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState();
+
+  const [consentId, setConsentId] = useState<number>();
+
+  useEffect(() => {
+    async function fetchConsentId() {
+      try {
+        const institutionsData = await institutionService.findAll();
+
+        const institutionId = institutionsData.find((item) => item.name == institution)?.id;
+
+        const data = await openFinanceService.getAllConsents(user?.id);
+        const consId = data.find((consent) => consent.institution_id == institutionId)?.id;
+        setConsentId(consId);
+      } catch (error: any) {
+        setError(error.message);
+      }
+    }
+
+    fetchConsentId();
+  }, []);
+
+  const revokeConsent = async () => {
+    try {
+      await openFinanceService.revokeConsent(consentId);
+    } catch (error: any) {
+      setError(error.response.data.error);
+    } finally {
+      setLinkCancelModal(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -56,6 +96,8 @@ export default function LinkSuccessfull() {
           <Text style={{ fontWeight: 'bold' }}>
             {expiration === null || expiration == 'null' ? 'Indeterminado' : expiration}
           </Text>
+
+          {error && <RequestErrorText text={error} />}
         </View>
       </View>
 
@@ -132,7 +174,7 @@ export default function LinkSuccessfull() {
                     text="Cancelar"
                     color={Colors.lightGray2}
                     textColor={Colors.red}
-                    onPress={() => setLinkCancelModal(false)}
+                    onPress={() => revokeConsent()}
                   />
                 </View>
               </View>

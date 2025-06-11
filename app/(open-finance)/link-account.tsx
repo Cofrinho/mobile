@@ -6,11 +6,11 @@ import OFInstitutionCard from '@/components/OFInstitutionCard';
 import RequestErrorText from '@/components/RequestErrorText';
 import Colors from '@/constants/colors';
 import { AuthContext } from '@/contexts/AuthContext';
-import institutionService from '@/services/institutions';
+import institutionService, { Institutions } from '@/services/institutions';
 import openFinanceService, { GetAllConsentData } from '@/services/open-finance';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Info, Search, TriangleAlert, Undo2 } from 'lucide-react-native';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, View } from 'react-native';
 
 interface institution {
@@ -28,7 +28,7 @@ export default function LinkAccount() {
   const { user } = useContext(AuthContext);
   const { hasAccount } = useLocalSearchParams();
 
-  const [institutions, setInstitutions] = useState([]);
+  const [institutions, setInstitutions] = useState([] as Institutions[]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
 
@@ -36,32 +36,34 @@ export default function LinkAccount() {
     [],
   );
 
-  useEffect(() => {
-    const fetchInstitutions = async () => {
-      try {
-        const data = await institutionService.findAll();
+  useFocusEffect(
+    useCallback(() => {
+      const fetchInstitutions = async () => {
+        try {
+          const data = await institutionService.findAll();
 
-        if (hasAccount == 'true') {
-          const alreadyLinkedIntitutionsData = await openFinanceService.getAllConsents(
-            Number(user?.id),
-          );
+          if (hasAccount == 'true') {
+            const alreadyLinkedIntitutionsData = await openFinanceService.getAllConsents(
+              Number(user?.id),
+            );
 
-          setAlreadyLinkedInstitutions(
-            alreadyLinkedIntitutionsData.filter((consent) => consent.id > 0),
-          );
+            setAlreadyLinkedInstitutions(
+              alreadyLinkedIntitutionsData.filter((consent) => consent.id > 0),
+            );
+          }
+
+          setInstitutions(data);
+          return data;
+        } catch (error: any) {
+          setError(error.message);
+        } finally {
+          setLoading(false);
         }
+      };
 
-        setInstitutions(data);
-        return data;
-      } catch (error: any) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchInstitutions();
-  }, []);
+      fetchInstitutions();
+    }, []),
+  );
 
   const renderItem = ({ item }: { item: institution }) => (
     <OFInstitutionCard

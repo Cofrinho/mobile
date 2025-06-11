@@ -4,9 +4,9 @@ import CircleIconButton from '@/components/CircleIconButton';
 import OFAccountCard from '@/components/OFAccountCard';
 import Colors from '@/constants/colors';
 import openFinanceService from '@/services/open-finance';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Undo2 } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
 
 function formatDatetime(dateStr: string): string {
@@ -58,22 +58,24 @@ export default function OpenFinance() {
 
   const [hasAccount, setHasAccount] = useState(false);
 
-  useEffect(() => {
-    const fetchInstitutions = async () => {
-      try {
-        const data = await openFinanceService.getDetailedBalance();
-        setInstitutions(data);
-        setHasAccount(true);
-        return data;
-      } catch (error: any) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  useFocusEffect(
+    useCallback(() => {
+      const fetchInstitutions = async () => {
+        try {
+          const data = await openFinanceService.getDetailedBalance();
+          setInstitutions(data);
+          setHasAccount(true);
+          return data;
+        } catch (error: any) {
+          setError(error.message);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-    fetchInstitutions();
-  }, []);
+      fetchInstitutions();
+    }, []),
+  );
 
   const renderItem = ({ item }: { item: account }) => (
     <OFAccountCard
@@ -96,7 +98,7 @@ export default function OpenFinance() {
         <CircleIconButton
           color={Colors.secondary}
           icon={<Undo2 size={24} color={Colors.primary} />}
-          onPress={() => router.back()}
+          onPress={() => router.push('/(tabs)/account')}
         />
 
         <View style={styles.titleContainer}>
