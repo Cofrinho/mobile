@@ -6,9 +6,16 @@ type props = TouchableOpacityProps & {
   name: string;
   logo: string;
   showIcon?: boolean;
+  alreadyLinked?: boolean;
 };
 
-export default function OFInstitutionCard({ name, logo, showIcon = true, ...props }: props) {
+export default function OFInstitutionCard({
+  name,
+  logo,
+  showIcon = true,
+  alreadyLinked,
+  ...props
+}: props) {
   return (
     <TouchableOpacity
       style={{
@@ -21,6 +28,7 @@ export default function OFInstitutionCard({ name, logo, showIcon = true, ...prop
         borderRadius: 12,
         alignItems: 'center',
       }}
+      disabled={alreadyLinked}
       {...props}
     >
       <View style={{ display: 'flex', flexDirection: 'row', gap: 12, alignItems: 'center' }}>
@@ -32,7 +40,14 @@ export default function OFInstitutionCard({ name, logo, showIcon = true, ...prop
           height={48}
           style={{ borderRadius: 100, objectFit: 'cover' }}
         />
-        <Text style={{ fontWeight: 'bold' }}>{name}</Text>
+        <View>
+          <Text style={{ fontWeight: 'bold' }}>{name}</Text>
+          {alreadyLinked && (
+            <Text style={{ fontWeight: 'semibold', color: Colors.primary }}>
+              Instituição já conectada
+            </Text>
+          )}
+        </View>
       </View>
 
       {showIcon && <ArrowRight />}

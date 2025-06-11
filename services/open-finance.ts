@@ -1,4 +1,15 @@
 import api from './api';
+export interface GetAllConsentData {
+  id: number;
+  user_id: number;
+  institution_id: number;
+  agency: string;
+  account_number: string;
+  is_active: boolean;
+  expired_at: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 const getExpirationDate = (expirationTime: string): string => {
   const now = new Date();
@@ -52,6 +63,10 @@ const openFinanceService = {
       `/open-finance/users/${userId}/institutions/${institutionId}/consents`,
       expirationTime != '0' ? { date: formattedDate } : {},
     );
+    return data;
+  },
+  getAllConsents: async (userId: number): Promise<GetAllConsentData[]> => {
+    const { data } = await api.get(`/open-finance/users/${userId}/consents`);
     return data;
   },
 };

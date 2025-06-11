@@ -20,7 +20,7 @@ export default function LinkSuccessfull() {
         <CircleIconButton
           color={Colors.secondary}
           icon={<Undo2 size={24} color={Colors.primary} />}
-          onPress={() => router.push('/(tabs)/account')}
+          onPress={() => router.back()}
         />
 
         <View style={styles.titleContainer}>
@@ -53,7 +53,9 @@ export default function LinkSuccessfull() {
 
         <View style={{ gap: 4 }}>
           <Text style={{ color: Colors.primary, fontWeight: '700' }}>Dados expiram em</Text>
-          <Text style={{ fontWeight: 'bold' }}>{expiration}</Text>
+          <Text style={{ fontWeight: 'bold' }}>
+            {expiration === null || expiration == 'null' ? 'Indeterminado' : expiration}
+          </Text>
         </View>
       </View>
 

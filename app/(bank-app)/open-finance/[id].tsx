@@ -84,11 +84,7 @@ export default function BankApp() {
         text="COMPARTILHAR DADOS"
         color="#fff"
         textColor="#000"
-        onPress={() =>
-          router.push(
-            `/(open-finance)/link-successfull/${id}?logo=${institution?.logo_url}&institution=${institution?.name}&start=${start}&expiration=${expiration}`,
-          )
-        }
+        onPress={() => router.push(`/(open-finance)/open-finance`)}
       />
     </SafeAreaView>
   );
