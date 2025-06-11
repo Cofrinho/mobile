@@ -12,8 +12,16 @@ const groupService = {
     const response = await api.post('/groups', group);
     return response.data;
   },
+  getById: async (groupId: string) => {
+    const response = await api.get(`/groups/${groupId}`);
+    return response.data;
+  },
   getAllByUser: async (userId: number) => {
     const response = await api.get(`/groups/user/${userId}`);
+    return response.data;
+  },
+  update: async (groupId: string, group: Partial<Group>) => {
+    const response = await api.patch(`/groups/${groupId}`, group);
     return response.data;
   },
 };

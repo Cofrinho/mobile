@@ -95,7 +95,7 @@ export default function Groups() {
         ) : (
           <FlatList
             data={groups}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.group.id}
             renderItem={renderItem}
             contentContainerStyle={{ gap: 4 }}
             showsVerticalScrollIndicator={false}
