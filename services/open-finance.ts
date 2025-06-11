@@ -1,5 +1,33 @@
 import api from './api';
 
+const getExpirationDate = (expirationTime: string): string => {
+  const now = new Date();
+
+  switch (expirationTime) {
+    case '3':
+      now.setMonth(now.getMonth() + 3);
+      break;
+
+    case '6':
+      now.setMonth(now.getMonth() + 6);
+      break;
+
+    case '12':
+      now.setMonth(now.getMonth() + 12);
+      break;
+
+    case '0':
+    default:
+      break;
+  }
+
+  const year = String(now.getFullYear()).slice(-2);
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+};
+
 const openFinanceService = {
   getBalanceAndLogos: async () => {
     const { data } = await api.get('/open-finance/users/balance');
@@ -7,6 +35,23 @@ const openFinanceService = {
   },
   getDetailedBalance: async () => {
     const { data } = await api.get('/open-finance/users/home');
+    return data;
+  },
+  createConsent: async ({
+    userId,
+    institutionId,
+    expirationTime,
+  }: {
+    userId: number;
+    institutionId: number;
+    expirationTime: string;
+  }) => {
+    const formattedDate = getExpirationDate(expirationTime);
+
+    const { data } = await api.post(
+      `/open-finance/users/${userId}/institutions/${institutionId}/consents`,
+      expirationTime != '0' ? { date: formattedDate } : {},
+    );
     return data;
   },
 };

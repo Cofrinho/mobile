@@ -3,16 +3,67 @@ import CircleIconButton from '@/components/CircleIconButton';
 import OFInstitutionCard from '@/components/OFInstitutionCard';
 import RadioButtonGroup from '@/components/RadioButtonGroup';
 import Colors from '@/constants/colors';
+import { AuthContext } from '@/contexts/AuthContext';
+import openFinanceService from '@/services/open-finance';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Undo2 } from 'lucide-react-native';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
+
+const getFormattedDateTime = () => {
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // meses são 0-based
+  const year = now.getFullYear();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+
+  return `${day}/${month}/${year} - ${hours}:${minutes}`;
+};
+
+const getFormattedDate = (expiration: number) => {
+  const now = new Date();
+  const futureDate = new Date(now);
+  futureDate.setMonth(futureDate.getMonth() + expiration);
+
+  const day = String(futureDate.getDate()).padStart(2, '0');
+  const month = String(futureDate.getMonth() + 1).padStart(2, '0');
+  const year = futureDate.getFullYear();
+
+  return `${day}/${month}/${year}`;
+};
 
 export default function LinkExpiration() {
   const router = useRouter();
+  const { user } = useContext(AuthContext);
   const { id, name, logo } = useLocalSearchParams();
 
   const [expirationTimeValue, setExpirationTimeValue] = useState('option1');
+
+  const [loading, setLoading] = useState(false);
+
+  const createConsent = async () => {
+    try {
+      setLoading(true);
+
+      const data = await openFinanceService.createConsent({
+        userId: Number(user?.id),
+        institutionId: Number(id),
+        expirationTime: expirationTimeValue,
+      });
+
+      router.push(
+        `/(bank-app)/open-finance/${id}?agency=${data.agency}&account=${data.account_number}&institution=${name}&start=${getFormattedDateTime()}&expiration=${expirationTimeValue == '0' ? 'Indeterminado' : getFormattedDate(Number(expirationTimeValue))}`,
+      );
+
+      return;
+    } catch (error: any) {
+      console.log(error.response.data);
+      console.log(error.message);
+    } finally {
+      setLoading((prev) => (prev = false));
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -62,7 +113,7 @@ export default function LinkExpiration() {
         </View>
       </View>
 
-      <Button text="CONFIRMAR" onPress={() => router.push(`/(bank-app)/open-finance/${id}`)} />
+      <Button text="CONFIRMAR" disabled={loading} onPress={() => createConsent()} />
     </View>
   );
 }

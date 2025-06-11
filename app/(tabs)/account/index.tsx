@@ -80,6 +80,7 @@ export default function Page() {
           borderRadius: 100,
           position: 'absolute',
           right: rightOffset,
+          backgroundColor: '#fff',
         }}
         source={{ uri: url }}
       />

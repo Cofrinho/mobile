@@ -6,20 +6,9 @@ import { Undo2, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const institution = {
-  id: '2',
-  name: 'Itaú',
-  logo: 'https://designconceitual.com.br/wp-content/uploads/2023/12/Ita%C3%BA-novo-logotipo-2023-1000x600.jpg',
-};
-
-const expiration = {
-  linkDate: '22/01/2025 - 13:41',
-  expirationDate: '16/06/2025',
-};
-
 export default function LinkSuccessfull() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const { id, logo, institution, expiration, start } = useLocalSearchParams();
 
   const [linkCancelModal, setLinkCancelModal] = useState(false);
 
@@ -46,12 +35,12 @@ export default function LinkSuccessfull() {
 
       <View style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', gap: 6 }}>
         <Image
-          source={{ uri: institution.logo }}
+          source={{ uri: logo.toString() }}
           width={64}
           height={64}
           style={{ borderRadius: 100 }}
         />
-        <Text style={{ fontWeight: 'bold' }}>{institution.name}</Text>
+        <Text style={{ fontWeight: 'bold' }}>{institution}</Text>
       </View>
 
       <View style={{ gap: 16, flex: 1, marginTop: 40 }}>
@@ -59,12 +48,12 @@ export default function LinkSuccessfull() {
           <Text style={{ color: Colors.primary, fontWeight: '700' }}>
             Início do compartilhamento
           </Text>
-          <Text style={{ fontWeight: 'bold' }}>{expiration.linkDate}</Text>
+          <Text style={{ fontWeight: 'bold' }}>{start}</Text>
         </View>
 
         <View style={{ gap: 4 }}>
           <Text style={{ color: Colors.primary, fontWeight: '700' }}>Dados expiram em</Text>
-          <Text style={{ fontWeight: 'bold' }}>{expiration.expirationDate}</Text>
+          <Text style={{ fontWeight: 'bold' }}>{expiration}</Text>
         </View>
       </View>
 

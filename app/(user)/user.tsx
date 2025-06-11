@@ -7,15 +7,9 @@ import { History, LogOut, Pencil, Trash, Undo2, X } from 'lucide-react-native';
 import { useContext, useState } from 'react';
 import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const user = {
-  avatar: '',
-  name: 'Usuário da Silva',
-  email: 'usuario@gmail.com',
-};
-
 export default function User() {
   const router = useRouter();
-  const { logout } = useContext(AuthContext);
+  const { logout, user } = useContext(AuthContext);
 
   const [deleteAccountModal, setDeleteAccountModal] = useState(false);
 
@@ -32,17 +26,17 @@ export default function User() {
 
         <View style={styles.contentContainer}>
           <View style={styles.userContainer}>
-            {user && user.avatar ? (
-              <Image src={user.avatar} />
+            {user && user.avatar_url ? (
+              <Image src={user.avatar_url} />
             ) : (
               <View style={styles.avatarContainer}>
-                <Text style={styles.usernameAvatar}>{user.name[0]}</Text>
+                <Text style={styles.usernameAvatar}>{user?.name[0]}</Text>
               </View>
             )}
 
             <View>
-              <Text style={styles.username}>{user.name}</Text>
-              <Text style={styles.email}>{user.email}</Text>
+              <Text style={styles.username}>{user?.name}</Text>
+              <Text style={styles.email}>{user?.email}</Text>
             </View>
           </View>
 
