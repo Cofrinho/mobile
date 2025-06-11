@@ -8,7 +8,7 @@ import groupService from '@/services/group';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { LogOut, Pencil, Trash, Undo2, UserRoundPlus, Users2 } from 'lucide-react-native';
 import { useCallback, useContext, useState } from 'react';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const groupArray = {
@@ -68,6 +68,7 @@ export default function GroupDetails() {
   const [modalVisible, setModalVisible] = useState(false);
   const { user } = useContext(AuthContext);
   const isGroupOwner = group?.group_owner === user?.id;
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   const renderItem = ({ item }: { item: Expense }) => (
     <TouchableOpacity onPress={() => router.push(`/(expense)/expense/${item.id}`)}>
@@ -92,6 +93,19 @@ export default function GroupDetails() {
       fetchGroups();
     }, [id]),
   );
+
+  const onDelete = async () => {
+    if (!group) return;
+    setLoading(true);
+    try {
+      await groupService.delete(group.id.toString());
+      router.back();
+    } catch (error) {
+      console.error('Error deleting group:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -138,7 +152,7 @@ export default function GroupDetails() {
                   color={Colors.secondary}
                   icon={<Trash size={22} color={Colors.primary} />}
                   border={true}
-                  onPress={() => console.log('Excluir grupo')}
+                  onPress={() => setDeleteModalVisible(true)}
                 />
               </>
             ) : (
@@ -198,6 +212,48 @@ export default function GroupDetails() {
           />
         </>
       )}
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={deleteModalVisible}
+        onRequestClose={() => setDeleteModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalBackdrop}
+          activeOpacity={1}
+          onPressOut={() => setDeleteModalVisible(false)}
+        >
+          <View style={styles.modalContainerWrapper}>
+            <TouchableOpacity activeOpacity={1}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>Confirmar exclusão</Text>
+                <Text style={styles.modalText}>
+                  Tem certeza que deseja excluir o grupo{' '}
+                  <Text style={{ fontWeight: 'bold' }}>{group?.name}</Text>?
+                </Text>
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, { backgroundColor: '#ccc' }]}
+                    onPress={() => setDeleteModalVisible(false)}
+                  >
+                    <Text style={styles.modalButtonText}>Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.modalButton, { backgroundColor: '#df171a' }]}
+                    onPress={async () => {
+                      setDeleteModalVisible(false);
+                      await onDelete();
+                    }}
+                  >
+                    <Text style={[styles.modalButtonText]}>Excluir</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -288,5 +344,52 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.primary,
     marginBottom: 12,
+  },
+  /* MODAL */
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    padding: 24,
+    borderRadius: 16,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalContainerWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
   },
 });
