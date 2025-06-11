@@ -39,6 +39,30 @@ const getExpirationDate = (expirationTime: string): string => {
   return `${year}-${month}-${day}`;
 };
 
+const getExpirationDateByMonth = (month: string): Date => {
+  const now = new Date();
+
+  switch (month) {
+    case '3':
+      now.setMonth(now.getMonth() + 3);
+      break;
+
+    case '6':
+      now.setMonth(now.getMonth() + 6);
+      break;
+
+    case '12':
+      now.setMonth(now.getMonth() + 12);
+      break;
+
+    case '0':
+    default:
+      break;
+  }
+
+  return now;
+};
+
 const openFinanceService = {
   getBalanceAndLogos: async () => {
     const { data } = await api.get('/open-finance/users/balance');
@@ -57,7 +81,7 @@ const openFinanceService = {
     institutionId: number;
     expirationTime: string;
   }) => {
-    const formattedDate = getExpirationDate(expirationTime);
+    const formattedDate = getExpirationDateByMonth(expirationTime);
 
     const { data } = await api.post(
       `/open-finance/users/${userId}/institutions/${institutionId}/consents`,

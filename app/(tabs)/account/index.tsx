@@ -164,9 +164,8 @@ export default function Page() {
             activeOpacity={1}
           />
         </View>
-
         <View style={styles.cofrinhoBalanceContainer}>
-          <View style={{ gap: 2 }}>
+          <View>
             <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>
               Saldo no cofrinho
             </Text>
@@ -185,7 +184,7 @@ export default function Page() {
           />
         </View>
 
-        {hasOpenFinanceConsent && (
+        {hasOpenFinanceConsent ? (
           <TouchableOpacity activeOpacity={1} onPress={() => router.push('/total-balance')}>
             <View
               style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}
@@ -207,15 +206,27 @@ export default function Page() {
               </View>
             </View>
 
-            {openFinanceData && !loading && (
+            {openFinanceData && !loading ? (
               <MoneyText
                 showMoney={showBalance}
                 amount={openFinanceData.balance}
                 color={Colors.black}
                 size={28}
               />
+            ) : (
+              <Animated.View
+                style={{
+                  width: '100%',
+                  height: 30,
+                  backgroundColor: Colors.lightGray2,
+                  borderRadius: 10,
+                  marginTop: 8,
+                }}
+              />
             )}
           </TouchableOpacity>
+        ) : (
+          <AnimatedView width={'100%'} height={70} />
         )}
 
         <OFCard />
