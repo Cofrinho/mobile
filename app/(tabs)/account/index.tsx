@@ -1,3 +1,4 @@
+import AnimatedView from '@/components/AnimatedView';
 import CircleIconButton from '@/components/CircleIconButton';
 import MoneyText from '@/components/MoneyText';
 import NotificationButton from '@/components/NotificationButton';
@@ -20,11 +21,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
-const openFinanceData = {
-  balance: 3200.75,
-  logos: ['https://bank-account-aggregator.onrender.com/santander-logo.png'],
-};
+import { RefreshControl } from 'react-native';
 
 interface IAccountData {
   balance: number;
@@ -38,6 +35,8 @@ interface IOpenFinanceData {
 }
 
 export default function Page() {
+  const [refreshing, setRefreshing] = useState(false);
+
   const router = useRouter();
 
   const { user, isAuthenticated } = useContext(AuthContext);
@@ -49,6 +48,22 @@ export default function Page() {
   const [hasOpenFinanceConsent, setHasOpenFinanceConsent] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const accountData = await accountService.mountAccountScreen();
+      setAccountData(accountData);
+
+      const openFinanceData = await openFinanceService.getBalanceAndLogos();
+      setHasOpenFinanceConsent(true);
+      setOpenFinanceData(openFinanceData);
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -90,155 +105,148 @@ export default function Page() {
     );
   };
 
-  const opacity = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, {
-          toValue: 0.5,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]),
-    ).start();
-  }, []);
-
   return (
-    <View style={styles.container}>
-      <View style={styles.userAndNotificationContainer}>
-        <TouchableOpacity
-          activeOpacity={1}
-          style={styles.userContainer}
-          onPress={() => router.push('/(user)/user')}
-        >
-          <View style={styles.userAvatarContainer}>
-            {user?.avatar_url ? (
-              <Image src={user?.avatar_url} />
-            ) : (
-              <Text style={styles.avatarFallback}>{user?.name[0]}</Text>
-            )}
-          </View>
-
-          <Text style={styles.username}>{user?.name}</Text>
-        </TouchableOpacity>
-
-        <NotificationButton
-          quantity={accountData?.notifications}
-          onPress={() => router.push('/notifications')}
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      showsHorizontalScrollIndicator={false}
+      style={{ backgroundColor: '#fff' }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={[Colors.primary]}
+          tintColor={Colors.primary}
         />
-      </View>
-
-      <View style={styles.welcomeAndEyeContainer}>
-        <View>
-          <Text style={styles.welcomeText}>Bem vindo de volta!</Text>
-          <Text style={styles.helloUserText}>Olá, {user?.name.split(' ', 1)[0]}!</Text>
-        </View>
-
-        <CircleIconButton
-          icon={
-            showBalance ? (
-              <Eye color={Colors.primary} size={24} />
-            ) : (
-              <EyeClosed color={Colors.primary} size={24} />
-            )
-          }
-          width={44}
-          height={44}
-          color={Colors.secondary}
-          onPress={() => setShowBalance((prevState) => !prevState)}
-          activeOpacity={1}
-        />
-      </View>
-
-      <View style={styles.cofrinhoBalanceContainer}>
-        <View style={{ gap: 2 }}>
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>Saldo no cofrinho</Text>
-          <MoneyText showMoney={showBalance} amount={accountData?.balance} size={28} color="#fff" />
-        </View>
-
-        <CircleIconButton
-          icon={<Plus color={Colors.primary} />}
-          color="#fff"
-          onPress={() => router.push('/add-funds')}
-        />
-      </View>
-
-      {hasOpenFinanceConsent && (
-        <TouchableOpacity activeOpacity={1} onPress={() => router.push('/total-balance')}>
-          <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 16 }}>
-              Saldo total
-            </Text>
-
-            <View>
-              {openFinanceData && !loading && (
-                <View style={{ display: 'flex', flexDirection: 'row' }}>
-                  {openFinanceData.logos.map((url, index) => (
-                    <LogoItem key={index} url={url} index={index} />
-                  ))}
-                </View>
+      }
+    >
+      <View style={styles.container}>
+        <View style={styles.userAndNotificationContainer}>
+          <TouchableOpacity
+            activeOpacity={1}
+            style={styles.userContainer}
+            onPress={() => router.push('/(user)/user')}
+          >
+            <View style={styles.userAvatarContainer}>
+              {user?.avatar_url ? (
+                <Image src={user?.avatar_url} />
+              ) : (
+                <Text style={styles.avatarFallback}>{user?.name[0]}</Text>
               )}
-
-              <ChevronRight color={Colors.primary} size={24} />
             </View>
+
+            <Text style={styles.username}>{user?.name}</Text>
+          </TouchableOpacity>
+
+          <NotificationButton
+            quantity={accountData?.notifications}
+            onPress={() => router.push('/notifications')}
+          />
+        </View>
+
+        <View style={styles.welcomeAndEyeContainer}>
+          <View>
+            <Text style={styles.welcomeText}>Bem vindo de volta!</Text>
+            <Text style={styles.helloUserText}>Olá, {user?.name.split(' ', 1)[0]}!</Text>
           </View>
 
-          {openFinanceData && !loading ? (
+          <CircleIconButton
+            icon={
+              showBalance ? (
+                <Eye color={Colors.primary} size={24} />
+              ) : (
+                <EyeClosed color={Colors.primary} size={24} />
+              )
+            }
+            width={44}
+            height={44}
+            color={Colors.secondary}
+            onPress={() => setShowBalance((prevState) => !prevState)}
+            activeOpacity={1}
+          />
+        </View>
+
+        <View style={styles.cofrinhoBalanceContainer}>
+          <View style={{ gap: 2 }}>
+            <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>
+              Saldo no cofrinho
+            </Text>
             <MoneyText
               showMoney={showBalance}
-              amount={openFinanceData.balance}
-              color={Colors.black}
+              amount={accountData?.balance}
               size={28}
+              color="#fff"
             />
-          ) : (
-            <Animated.View
-              style={{
-                width: '100%',
-                height: 30,
-                backgroundColor: Colors.lightGray2,
-                borderRadius: 10,
-                marginTop: 8,
-                opacity,
-              }}
-            ></Animated.View>
-          )}
-        </TouchableOpacity>
-      )}
+          </View>
 
-      <OFCard />
+          <CircleIconButton
+            icon={<Plus color={Colors.primary} />}
+            color="#fff"
+            onPress={() => router.push('/add-funds')}
+          />
+        </View>
 
-      <View style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <TouchableOpacity
-          onPress={() => router.push('/transactions')}
-          activeOpacity={1}
-          style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}
-        >
-          <Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 16 }}>
-            Entradas e saídas
+        {hasOpenFinanceConsent && (
+          <TouchableOpacity activeOpacity={1} onPress={() => router.push('/total-balance')}>
+            <View
+              style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}
+            >
+              <Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 16 }}>
+                Saldo total
+              </Text>
+
+              <View>
+                {openFinanceData && !loading && (
+                  <View style={{ display: 'flex', flexDirection: 'row' }}>
+                    {openFinanceData.logos.map((url, index) => (
+                      <LogoItem key={index} url={url} index={index} />
+                    ))}
+                  </View>
+                )}
+
+                <ChevronRight color={Colors.primary} size={24} />
+              </View>
+            </View>
+
+            {openFinanceData && !loading && (
+              <MoneyText
+                showMoney={showBalance}
+                amount={openFinanceData.balance}
+                color={Colors.black}
+                size={28}
+              />
+            )}
+          </TouchableOpacity>
+        )}
+
+        <OFCard />
+
+        <View style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <TouchableOpacity
+            onPress={() => router.push('/transactions')}
+            activeOpacity={1}
+            style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}
+          >
+            <Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 16 }}>
+              Entradas e saídas
+            </Text>
+
+            <ChevronRight color={Colors.primary} size={24} />
+          </TouchableOpacity>
+
+          <Text style={{ color: Colors.lightGray, fontWeight: 'bold', fontSize: 16 }}>
+            Últimas transações
           </Text>
 
-          <ChevronRight color={Colors.primary} size={24} />
-        </TouchableOpacity>
-
-        <Text style={{ color: Colors.lightGray, fontWeight: 'bold', fontSize: 16 }}>
-          Últimas transações
-        </Text>
-
-        <ScrollView>
-          <View style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <TransactionCard operation="in" value={40} title="Recarga Cofrinho" />
-            <TransactionCard operation="out" value={40} title="Recarga Cofrinho" />
-            <TransactionCard operation="in" value={40} title="Recarga Cofrinho" />
-          </View>
-        </ScrollView>
+          <ScrollView>
+            <View style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <TransactionCard operation="in" value={40} title="Recarga Cofrinho" />
+              <TransactionCard operation="out" value={40} title="Recarga Cofrinho" />
+              <TransactionCard operation="in" value={40} title="Recarga Cofrinho" />
+            </View>
+          </ScrollView>
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
