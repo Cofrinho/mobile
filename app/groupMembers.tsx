@@ -5,7 +5,7 @@ import groupService from '@/services/group';
 import { router, useLocalSearchParams } from 'expo-router';
 import { LogOut, Star, Undo2 } from 'lucide-react-native';
 import { useContext, useEffect, useState } from 'react';
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface Group {
@@ -50,6 +50,8 @@ export default function GroupMembers() {
   const [group, setGroup] = useState<Group | null>(null);
   const [members, setMembers] = useState<GroupMember[]>([]);
   const isGroupOwner = group?.group_owner === user?.id;
+  const [removeModalVisible, setRemoveModalVisible] = useState(false);
+  const [participantToRemove, setParticipantToRemove] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -90,6 +92,18 @@ export default function GroupMembers() {
     fetchMembers();
   }, [group]);
 
+  const onRemove = async () => {
+    if (!group) return;
+    if (!participantToRemove) return;
+    const userId = participantToRemove;
+    try {
+      await groupService.leaveGroup(group.id.toString(), userId.toString());
+      router.back();
+    } catch (error) {
+      console.error('Erro ao remover membro do grupo:', error);
+    }
+  };
+
   const renderItem = ({ item }: { item: GroupMember }) => (
     <View style={styles.memberCard}>
       <Image
@@ -122,7 +136,10 @@ export default function GroupMembers() {
               color={Colors.secondary}
               icon={<LogOut size={18} color={Colors.primary} />}
               border={true}
-              onPress={() => console.log('Removeu o membro do grupo')}
+              onPress={() => {
+                setParticipantToRemove(item.id);
+                setRemoveModalVisible(true);
+              }}
             />
           </View>
         )
@@ -161,6 +178,47 @@ export default function GroupMembers() {
           </View>
         )}
       </View>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={removeModalVisible}
+        onRequestClose={() => setRemoveModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalBackdrop}
+          activeOpacity={1}
+          onPressOut={() => setRemoveModalVisible(false)}
+        >
+          <View style={styles.modalContainerWrapper}>
+            <TouchableOpacity activeOpacity={1}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>Remover membro</Text>
+                <Text style={styles.modalText}>
+                  Tem certeza que deseja remover o membro do grupo?
+                </Text>
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, { backgroundColor: '#ccc' }]}
+                    onPress={() => setRemoveModalVisible(false)}
+                  >
+                    <Text style={styles.modalButtonText}>Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.modalButton, { backgroundColor: '#df171a' }]}
+                    onPress={async () => {
+                      setRemoveModalVisible(false);
+                      await onRemove();
+                    }}
+                  >
+                    <Text style={[styles.modalButtonText]}>Remover</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -215,5 +273,52 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.lightGray,
     fontWeight: '600',
+  },
+  /* MODAL */
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    padding: 24,
+    borderRadius: 16,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalContainerWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
   },
 });

@@ -36,6 +36,10 @@ const groupService = {
     const response = await api.get(`/participants/group/${groupId}`);
     return response.data;
   },
+  leaveGroup: async (groupId: string, userId: string) => {
+    const response = await api.delete(`/participants/group/${groupId}/user/${userId}`);
+    return response.data;
+  },
 };
 
 export default groupService;

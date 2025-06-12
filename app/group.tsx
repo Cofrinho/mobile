@@ -69,6 +69,7 @@ export default function GroupDetails() {
   const { user } = useContext(AuthContext);
   const isGroupOwner = group?.group_owner === user?.id;
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [leaveModalVisible, setLeaveModalVisible] = useState(false);
 
   const renderItem = ({ item }: { item: Expense }) => (
     <TouchableOpacity onPress={() => router.push(`/(expense)/expense/${item.id}`)}>
@@ -102,6 +103,19 @@ export default function GroupDetails() {
       router.back();
     } catch (error) {
       console.error('Error deleting group:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onLeave = async () => {
+    if (!group || !user) return;
+    try {
+      setLoading(true);
+      await groupService.leaveGroup(group.id.toString(), user.id.toString());
+      router.back();
+    } catch (error: any) {
+      console.error('Error leaving group:', error?.response);
     } finally {
       setLoading(false);
     }
@@ -160,7 +174,7 @@ export default function GroupDetails() {
                 color={Colors.secondary}
                 icon={<LogOut size={22} color={Colors.primary} />}
                 border={true}
-                onPress={() => console.log('Sair')}
+                onPress={() => setLeaveModalVisible(true)}
               />
             )}
 
@@ -183,11 +197,25 @@ export default function GroupDetails() {
                 />
               ) : (
                 <View style={styles.organizerBox}>
-                  <Image source={{ uri: groupArray.organizer.avatar }} style={styles.avatar} />
-                  <View>
-                    <Text style={styles.organizerName}>{groupArray.organizer.name}</Text>
-                    <Text style={styles.organizerLabel}>Organizador</Text>
-                  </View>
+                  {group.participants
+                    .filter((item: any) => item.participant.id === group.group_owner)
+                    .map((item: any) => (
+                      <View
+                        key={item.participant.id}
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}
+                      >
+                        <Image
+                          source={{
+                            uri: item.participant.avatar_url || 'https://i.sstatic.net/l60Hf.png',
+                          }}
+                          style={styles.avatar}
+                        />
+                        <View>
+                          <Text style={styles.organizerName}>{item.participant.name}</Text>
+                          <Text style={styles.organizerLabel}>Organizador</Text>
+                        </View>
+                      </View>
+                    ))}
                 </View>
               )}
             </View>
@@ -247,6 +275,48 @@ export default function GroupDetails() {
                     }}
                   >
                     <Text style={[styles.modalButtonText]}>Excluir</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={leaveModalVisible}
+        onRequestClose={() => setLeaveModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalBackdrop}
+          activeOpacity={1}
+          onPressOut={() => setLeaveModalVisible(false)}
+        >
+          <View style={styles.modalContainerWrapper}>
+            <TouchableOpacity activeOpacity={1}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>Sair do Grupo</Text>
+                <Text style={styles.modalText}>
+                  Tem certeza que deseja sair do grupo{' '}
+                  <Text style={{ fontWeight: 'bold' }}>{group?.name}</Text>?
+                </Text>
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, { backgroundColor: '#ccc' }]}
+                    onPress={() => setLeaveModalVisible(false)}
+                  >
+                    <Text style={styles.modalButtonText}>Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.modalButton, { backgroundColor: '#df171a' }]}
+                    onPress={async () => {
+                      setLeaveModalVisible(false);
+                      await onLeave();
+                    }}
+                  >
+                    <Text style={[styles.modalButtonText]}>Sair</Text>
                   </TouchableOpacity>
                 </View>
               </View>
