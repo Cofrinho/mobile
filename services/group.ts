@@ -20,6 +20,10 @@ const groupService = {
     const response = await api.get(`/groups/user/${userId}`);
     return response.data;
   },
+  joinGroup: async (accessCode: string) => {
+    const response = await api.post(`/participants/access-code/${accessCode}`);
+    return response.data;
+  },
   update: async (groupId: string, group: Partial<Group>) => {
     const response = await api.patch(`/groups/${groupId}`, group);
     return response.data;

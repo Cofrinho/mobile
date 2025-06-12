@@ -5,11 +5,14 @@ import Input from '@/components/Input';
 import Colors from '@/constants/colors';
 import { AuthContext } from '@/contexts/AuthContext';
 import groupService from '@/services/group';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { router, useFocusEffect } from 'expo-router';
 import { Plus, X } from 'lucide-react-native';
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { z } from 'zod';
 
 interface Group {
   group: {
@@ -24,10 +27,58 @@ interface Group {
 }
 
 export default function Groups() {
+  const { user } = useContext(AuthContext);
+  const [groups, setGroups] = useState<Group[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [groups, setGroups] = useState<Group[]>([]);
-  const { user } = useContext(AuthContext);
+  const [responseError, setResponseError] = useState('' as string);
+
+  const schema = z.object({
+    accessCodeGroup: z
+      .string()
+      .nonempty('O código do grupo é obrigatório')
+      .min(4, 'O código do grupo deve ter 4 caracteres.')
+      .max(4, 'O código do grupo deve ter 4 caracteres.'),
+  });
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    clearErrors,
+  } = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      accessCodeGroup: '',
+    },
+  });
+
+  const onSubmit = async (data: { accessCodeGroup: string }) => {
+    if (!user) {
+      console.error('Usuário não autenticado.');
+      return;
+    }
+    try {
+      setLoading(true);
+      await groupService.joinGroup(data.accessCodeGroup);
+      setModalVisible(false);
+      const response = await groupService.getAllByUser(user.id);
+      setGroups(response);
+    } catch (error: any) {
+      if (error?.status === 404) {
+        setResponseError('Grupo não encontrado ou código inválido.');
+      }
+      if (
+        error?.status === 400 &&
+        error.response?.data?.error == 'User is already an active participant in this group.'
+      ) {
+        setResponseError('Você já está no grupo informado.');
+      }
+      console.error('Erro ao entrar no grupo:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -51,6 +102,24 @@ export default function Groups() {
       fetchGroups();
     }, [user]),
   );
+
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      const timer = setTimeout(() => {
+        clearErrors();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errors, clearErrors]);
+
+  useEffect(() => {
+    if (responseError) {
+      const timer = setTimeout(() => {
+        setResponseError('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [responseError]);
 
   const renderItem = ({ item }: { item: Group }) => {
     return (
@@ -150,16 +219,34 @@ export default function Groups() {
               <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 40 }}>
                 Entrar em um grupo
               </Text>
-              <Input
-                placeholder="Código do grupo"
-                autoCapitalize="characters"
-                autoCorrect={false}
-                keyboardType="default"
-                textContentType="none"
-                autoComplete="off"
-                inputMode="text"
+              <Controller
+                control={control}
+                name="accessCodeGroup"
+                render={({ field: { onChange, value } }) => (
+                  <Input
+                    placeholder="Código do grupo"
+                    onChangeText={onChange}
+                    value={value}
+                    autoCapitalize="characters"
+                    autoCorrect={false}
+                    keyboardType="default"
+                    textContentType="none"
+                    autoComplete="off"
+                    inputMode="text"
+                  />
+                )}
               />
-              <Button text="Entrar" onPress={() => setModalVisible(false)} />
+              {errors.accessCodeGroup && (
+                <Text style={{ color: 'red', marginLeft: 8, marginBottom: 12 }}>
+                  {errors.accessCodeGroup.message}
+                </Text>
+              )}
+              {responseError && (
+                <Text style={{ color: Colors.red, marginLeft: 8, marginBottom: 12 }}>
+                  {responseError}
+                </Text>
+              )}
+              <Button text="Entrar" onPress={handleSubmit(onSubmit)} />
             </View>
           </TouchableOpacity>
         </View>
