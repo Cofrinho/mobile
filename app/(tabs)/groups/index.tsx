@@ -3,46 +3,143 @@ import CircleIconButton from '@/components/CircleIconButton';
 import GroupCard from '@/components/GroupCard';
 import Input from '@/components/Input';
 import Colors from '@/constants/colors';
-import { router } from 'expo-router';
+import { AuthContext } from '@/contexts/AuthContext';
+import groupService from '@/services/group';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { router, useFocusEffect } from 'expo-router';
 import { Plus, X } from 'lucide-react-native';
-import { useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-const groupsArray = [
-  {
-    id: '1',
-    title: 'Churrascada',
-    members: 7,
-    image:
-      'https://minervafoods.com/wp-content/uploads/2023/02/Acompanhamento-para-churrasco-confira-8-opcoes-saborosas-scaled.jpg',
-  },
-  {
-    id: '2',
-    title: 'Viagem praia',
-    members: 12,
-    image: 'https://static.ndmais.com.br/2023/12/praia-tropical-com-areia-branca-scaled.jpg',
-  },
-];
+import { z } from 'zod';
 
 interface Group {
-  id: string;
-  title: string;
-  members: number;
-  image: string;
+  group: {
+    id: string;
+    name: string;
+    image_url?: string;
+  };
+  participants?: Array<{
+    id: string;
+    user_id: string;
+  }>;
 }
 
 export default function Groups() {
+  const { user } = useContext(AuthContext);
+  const [groups, setGroups] = useState<Group[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [responseError, setResponseError] = useState('' as string);
 
-  const renderItem = ({ item }: { item: Group }) => (
-    <GroupCard
-      title={item.title}
-      members={item.members}
-      image={item.image}
-      onPress={() => router.push({ pathname: '/group', params: { id: item.id } })}
-    />
+  const schema = z.object({
+    accessCodeGroup: z
+      .string()
+      .nonempty('O código do grupo é obrigatório')
+      .min(4, 'O código do grupo deve ter 4 caracteres.')
+      .max(4, 'O código do grupo deve ter 4 caracteres.'),
+  });
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    clearErrors,
+    reset,
+  } = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      accessCodeGroup: '',
+    },
+  });
+
+  const onSubmit = async (data: { accessCodeGroup: string }) => {
+    if (!user) {
+      console.error('Usuário não autenticado.');
+      return;
+    }
+    try {
+      setLoading(true);
+      await groupService.joinGroup(data.accessCodeGroup);
+      setModalVisible(false);
+      const response = await groupService.getAllByUser(user.id);
+      setGroups(response);
+      reset({
+        accessCodeGroup: '',
+      });
+    } catch (error: any) {
+      if (error?.status === 404) {
+        setResponseError('Grupo não encontrado ou código inválido.');
+      }
+      if (
+        error?.status === 400 &&
+        error.response?.data?.error == 'User is already an active participant in this group.'
+      ) {
+        setResponseError('Você já está no grupo informado.');
+      }
+      console.error('Erro ao entrar no grupo:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchGroups = async () => {
+        setLoading(true);
+        try {
+          if (!user) {
+            console.error('Usuário não autenticado.');
+            setGroups([]);
+            return;
+          }
+          const response = await groupService.getAllByUser(user.id);
+          setGroups(response);
+        } catch (error) {
+          console.error('Error fetching groups:', error);
+          setGroups([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchGroups();
+    }, [user]),
   );
+
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      const timer = setTimeout(() => {
+        clearErrors();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errors, clearErrors]);
+
+  useEffect(() => {
+    if (responseError) {
+      const timer = setTimeout(() => {
+        setResponseError('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [responseError]);
+
+  const renderItem = ({ item }: { item: Group }) => {
+    return (
+      <GroupCard
+        title={item.group.name}
+        members={item.participants?.length ?? 0}
+        image={
+          item.group.image_url
+            ? item.group.image_url
+            : 'https://peqengenhariajr.com.br/wp-content/uploads/2021/03/dinamica-de-grupo.jpg'
+        }
+        onPress={() => router.push({ pathname: '/group', params: { id: item.group.id } })}
+      />
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.subcontainer}>
@@ -62,13 +159,21 @@ export default function Groups() {
             onPress={() => router.push('/addGroup')}
           />
         </View>
-        <FlatList
-          data={groupsArray}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={{ gap: 4 }}
-          showsVerticalScrollIndicator={false}
-        />
+        {loading ? (
+          <Text>Carregando grupos...</Text>
+        ) : groups.length === 0 ? (
+          <Text style={{ textAlign: 'center', marginTop: 20 }}>
+            Você ainda não está em nenhum grupo. Crie ou entre em um grupo!
+          </Text>
+        ) : (
+          <FlatList
+            data={groups}
+            keyExtractor={(item) => item.group.id}
+            renderItem={renderItem}
+            contentContainerStyle={{ gap: 4 }}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
       </View>
       <Button text="Entrar em um grupo" onPress={() => setModalVisible(true)} />
       <Modal
@@ -118,16 +223,34 @@ export default function Groups() {
               <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 40 }}>
                 Entrar em um grupo
               </Text>
-              <Input
-                placeholder="Código do grupo"
-                autoCapitalize="characters"
-                autoCorrect={false}
-                keyboardType="default"
-                textContentType="none"
-                autoComplete="off"
-                inputMode="text"
+              <Controller
+                control={control}
+                name="accessCodeGroup"
+                render={({ field: { onChange, value } }) => (
+                  <Input
+                    placeholder="Código do grupo"
+                    onChangeText={onChange}
+                    value={value}
+                    autoCapitalize="characters"
+                    autoCorrect={false}
+                    keyboardType="default"
+                    textContentType="none"
+                    autoComplete="off"
+                    inputMode="text"
+                  />
+                )}
               />
-              <Button text="Entrar" onPress={() => setModalVisible(false)} />
+              {errors.accessCodeGroup && (
+                <Text style={{ color: 'red', marginLeft: 8, marginBottom: 12 }}>
+                  {errors.accessCodeGroup.message}
+                </Text>
+              )}
+              {responseError && (
+                <Text style={{ color: Colors.red, marginLeft: 8, marginBottom: 12 }}>
+                  {responseError}
+                </Text>
+              )}
+              <Button text="Entrar" onPress={handleSubmit(onSubmit)} />
             </View>
           </TouchableOpacity>
         </View>

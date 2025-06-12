@@ -2,15 +2,44 @@ import Button from '@/components/Button';
 import CircleIconButton from '@/components/CircleIconButton';
 import Input from '@/components/Input';
 import Colors from '@/constants/colors';
+import { AuthContext } from '@/contexts/AuthContext';
+import groupService from '@/services/group';
+import { zodResolver } from '@hookform/resolvers/zod';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { ImagePlus, Trash2, Undo2 } from 'lucide-react-native';
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { z } from 'zod';
+
+const schema = z.object({
+  name: z.string().min(1, { message: 'O campo nome é obrigatório' }).max(40),
+  description: z
+    .string()
+    .max(100, { message: 'A descrição deve ter no máximo 100 caracteres' })
+    .optional(),
+});
 
 export default function addGroup() {
+  const { user } = useContext(AuthContext);
   const [urlDevice, setUrlDevice] = useState('');
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    clearErrors,
+  } = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      name: '',
+      description: '',
+    },
+    mode: 'onTouched',
+  });
+  const [loading, setLoading] = useState(false);
+  const [responseError, setResponseError] = useState('' as string);
 
   async function buscaNaGaleria() {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -25,6 +54,42 @@ export default function addGroup() {
       setUrlDevice(path);
     }
   }
+
+  const groupRegister = async (data: any) => {
+    if (!user) {
+      setResponseError('Usuário não autenticado.');
+      setLoading(false);
+      return;
+    }
+    const groupData = {
+      group_owner: user.id,
+      name: data.name,
+      description: data.description || '',
+      image: urlDevice,
+    };
+    try {
+      setLoading(true);
+      await groupService.create(groupData);
+      setResponseError('');
+      router.back();
+    } catch (error: any) {
+      console.error('Erro ao criar grupo:', error);
+      const apiMessage =
+        error?.response?.data?.error ?? error?.message ?? 'Erro inesperado. Tente novamente.';
+      setResponseError(apiMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      const timer = setTimeout(() => {
+        clearErrors();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errors, clearErrors]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -68,27 +133,57 @@ export default function addGroup() {
             </View>
           </TouchableOpacity>
 
-          <Input
-            placeholder="Nome do grupo"
-            autoCapitalize="words"
-            autoCorrect={false}
-            returnKeyType="next"
-            onSubmitEditing={() => {}}
+          <Controller
+            control={control}
+            name="name"
+            render={({ field: { onChange, value } }) => (
+              <Input
+                placeholder="Nome do grupo"
+                onChangeText={onChange}
+                value={value}
+                autoCapitalize="words"
+                autoCorrect={false}
+                returnKeyType="next"
+                maxLength={40}
+                inputMode="text"
+                textContentType="name"
+                autoComplete="name"
+              />
+            )}
           />
-          <Input
-            placeholder="Descrição do grupo"
-            autoCapitalize="sentences"
-            autoCorrect={false}
-            returnKeyType="done"
-            onSubmitEditing={() => {}}
+          {errors.name && (
+            <Text style={{ color: 'red', marginLeft: 8, marginBottom: 12 }}>
+              {errors.name.message}
+            </Text>
+          )}
+
+          <Controller
+            control={control}
+            name="description"
+            render={({ field: { onChange, value } }) => (
+              <Input
+                placeholder="Descrição do grupo"
+                onChangeText={onChange}
+                value={value}
+                autoCapitalize="sentences"
+                autoCorrect={false}
+                returnKeyType="done"
+                onSubmitEditing={() => {}}
+                maxLength={100}
+                inputMode="text"
+                textContentType="name"
+                autoComplete="name"
+              />
+            )}
           />
-          <Button
-            text="Criar Grupo"
-            onPress={() => {
-              console.log('Grupo criado');
-              router.push('/(tabs)/groups');
-            }}
-          />
+          {errors.description && (
+            <Text style={{ color: 'red', marginLeft: 8, marginBottom: 4 }}>
+              {errors.description.message}
+            </Text>
+          )}
+
+          {responseError && <Text style={{ color: Colors.red }}>{responseError}</Text>}
+          <Button text="Criar Grupo" onPress={handleSubmit(groupRegister)} />
         </View>
       </View>
     </SafeAreaView>
