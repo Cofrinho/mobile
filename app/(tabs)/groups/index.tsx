@@ -46,6 +46,7 @@ export default function Groups() {
     handleSubmit,
     formState: { errors },
     clearErrors,
+    reset,
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -64,6 +65,9 @@ export default function Groups() {
       setModalVisible(false);
       const response = await groupService.getAllByUser(user.id);
       setGroups(response);
+      reset({
+        accessCodeGroup: '',
+      });
     } catch (error: any) {
       if (error?.status === 404) {
         setResponseError('Grupo não encontrado ou código inválido.');
