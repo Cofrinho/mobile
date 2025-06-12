@@ -1,46 +1,39 @@
+import AnimatedView from '@/components/AnimatedView';
 import Button from '@/components/Button';
 import CircleIconButton from '@/components/CircleIconButton';
+import ErrorText from '@/components/ErrorText';
 import SelectOFAccount from '@/components/SelectAccount';
+import Subtitle from '@/components/Subtitle';
 import Colors from '@/constants/colors';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { AuthContext } from '@/contexts/AuthContext';
+import institutionService from '@/services/institutions';
+import openFinanceService from '@/services/open-finance';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Undo2 } from 'lucide-react-native';
-import { useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 
-const accounts = [
-  {
-    id: '1',
-    logo: 'https://designconceitual.com.br/wp-content/uploads/2023/12/Ita%C3%BA-novo-logotipo-2023-1000x600.jpg',
-    name: 'Itaú',
-    institution: 1,
-    amount: 1000,
-    account: '124938439',
-    agency: '0001',
-  },
-  {
-    id: '2',
-    logo: 'https://cdn-1.webcatalog.io/catalog/nubank/nubank-icon-filled-256.png?v=1745196590866',
-    name: 'Nubank',
-    institution: 2,
-    amount: 324,
-    account: '99763525',
-    agency: '0001',
-  },
-];
-
 interface account {
-  id: string;
-  logo: string;
-  name: string;
-  amount: number;
+  institutionId: number;
+  logo_url: string;
+  institutionName: string;
+  balance: number;
   account: string;
   agency: string;
+  expirationDate: string;
+  startDate: string;
+}
+
+interface totalBalanceResponse {
+  balanceTotal: number;
+  accounts: account[];
 }
 
 export default function SelectPaymentAccount() {
   const router = useRouter();
 
   const { value } = useLocalSearchParams();
+  const { user } = useContext(AuthContext);
 
   const [selectedAccount, setSelectedAccount] = useState(0);
 
@@ -49,15 +42,49 @@ export default function SelectPaymentAccount() {
     currency: 'BRL',
   }).format(Number(value) / 100);
 
+  const [institutions, setInstitutions] = useState({} as totalBalanceResponse);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState();
+
+  const [hasAccount, setHasAccount] = useState(false);
+
+  const [account, setAccount] = useState({} as account);
+  const [institutionColor, setInstitutionColor] = useState<string>();
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchInstitutions = async () => {
+        try {
+          const data = await openFinanceService.getDetailedBalance();
+
+          setInstitutions(data);
+          setHasAccount(true);
+          return data;
+        } catch (error: any) {
+          setError(error.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchInstitutions();
+    }, []),
+  );
+
   const renderItem = ({ item }: { item: account }) => (
     <SelectOFAccount
-      logo={item.logo}
-      name={item.name}
-      amount={item.amount}
       account={item.account}
       agency={item.agency}
-      onPress={() => setSelectedAccount(Number(item.id))}
-      selected={selectedAccount == Number(item.id)}
+      amount={item.balance}
+      logo={item.logo_url}
+      name={item.institutionName}
+      onPress={() => {
+        setSelectedAccount(Number(item.institutionId));
+        setAccount(item);
+      }}
+      selected={selectedAccount == Number(item.institutionId)}
+      valueIsMoreThanBalance={Number(value) / 100 > Number(item.balance)}
+      disabled={Number(value) / 100 > Number(item.balance)}
     />
   );
 
@@ -67,7 +94,7 @@ export default function SelectPaymentAccount() {
         <CircleIconButton
           color={Colors.secondary}
           icon={<Undo2 size={24} color={Colors.primary} />}
-          onPress={() => router.back()}
+          onPress={() => router.push('/(tabs)/add-funds')}
         />
 
         <View style={styles.titleContainer}>
@@ -86,20 +113,39 @@ export default function SelectPaymentAccount() {
 
       <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Contas conectadas</Text>
 
-      <FlatList
-        data={accounts}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={{ paddingVertical: 12 }}
-        ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-        showsVerticalScrollIndicator={false}
-        style={{ flexGrow: 0 }}
-      />
+      {hasAccount ? (
+        <FlatList
+          data={institutions.accounts}
+          keyExtractor={(item) => item.institutionId.toString()}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingVertical: 12 }}
+          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+          showsVerticalScrollIndicator={false}
+          style={{ flexGrow: 0 }}
+        />
+      ) : loading ? (
+        <AnimatedView width={'100%'} height={70} marginVertical={12} />
+      ) : (
+        <View style={{ marginVertical: 12 }}>
+          <Subtitle>Nenhuma conta encontrada</Subtitle>
+        </View>
+      )}
 
       <Button
-        text="CONFIRMAR PAGAMENTO"
-        onPress={() => router.push(`/(bank-app)/payment/${selectedAccount}?value=${value}`)}
+        text="PAGAR COM A CONTA SELECIONADA"
+        disabled={selectedAccount == 0}
+        onPress={() =>
+          router.push(
+            `/(bank-app)/payment/${account.institutionId}?value=${value}&institutionName=${account.institutionName}&logo=${account.logo_url}&account=${account.account}&agency=${account.agency}&userId=${user?.id}`,
+          )
+        }
       />
+
+      {selectedAccount == 0 && (
+        <View style={{ marginTop: 10 }}>
+          <ErrorText text="Selecione uma conta" />
+        </View>
+      )}
     </View>
   );
 }

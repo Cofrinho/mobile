@@ -1,7 +1,8 @@
 import Button from '@/components/Button';
+import ErrorText from '@/components/ErrorText';
 import Colors from '@/constants/colors';
 import { useRouter } from 'expo-router';
-import { Check } from 'lucide-react-native';
+import { Check, ShowerHead } from 'lucide-react-native';
 import { useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -23,13 +24,20 @@ export default function AddFunds() {
     }).format(number);
   }
 
+  const [hasTouched, setHasTouched] = useState(false);
+
   function handleChange(text: string) {
+    if (!hasTouched) setHasTouched(true);
+
     const digitsOnly = text.replace(/\D/g, '');
     const cleaned = digitsOnly.replace(/^0+/, '') || '0';
     const limited = cleaned.slice(0, 8);
 
     setRawValue(limited);
   }
+
+  const numericValue = Number(rawValue) / 100;
+  const showError = hasTouched && (numericValue <= 0 || numericValue > 5000);
 
   return (
     <View style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -91,7 +99,20 @@ export default function AddFunds() {
         <Button
           text="PROSSEGUIR PARA O PAGAMENTO"
           onPress={() => router.replace(`/(open-finance)/select-payment-account/${rawValue}`)}
+          disabled={!ofSelected || showError || !rawValue}
         />
+
+        {!ofSelected && (
+          <View>
+            <ErrorText text="Selecione uma forma de pagamento" />
+          </View>
+        )}
+
+        {showError && (
+          <View>
+            <ErrorText text="Insira um valor válido. Min: R$ 0,01, Max: R$ 5.000" />
+          </View>
+        )}
       </View>
     </View>
   );

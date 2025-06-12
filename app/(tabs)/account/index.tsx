@@ -184,7 +184,7 @@ export default function Page() {
           />
         </View>
 
-        {hasOpenFinanceConsent ? (
+        {hasOpenFinanceConsent && (
           <TouchableOpacity activeOpacity={1} onPress={() => router.push('/total-balance')}>
             <View
               style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}
@@ -225,8 +225,6 @@ export default function Page() {
               />
             )}
           </TouchableOpacity>
-        ) : (
-          <AnimatedView width={'100%'} height={70} />
         )}
 
         <OFCard />

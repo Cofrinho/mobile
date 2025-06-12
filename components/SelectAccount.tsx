@@ -1,6 +1,7 @@
 import Colors from '@/constants/colors';
 import { Image, Text, TouchableOpacity, TouchableOpacityProps, View } from 'react-native';
 import MoneyText from './MoneyText';
+import ErrorText from './ErrorText';
 
 type props = TouchableOpacityProps & {
   logo: string;
@@ -9,6 +10,7 @@ type props = TouchableOpacityProps & {
   account: string;
   amount: number;
   selected: boolean;
+  valueIsMoreThanBalance: boolean;
 };
 
 export default function SelectOFAccount({
@@ -18,6 +20,7 @@ export default function SelectOFAccount({
   account,
   amount,
   selected,
+  valueIsMoreThanBalance,
   ...props
 }: props) {
   return (
@@ -63,7 +66,10 @@ export default function SelectOFAccount({
         </View>
       </View>
 
-      <MoneyText amount={amount} color={Colors.black} size={16} />
+      <View>
+        <MoneyText amount={amount} color={Colors.black} size={16} />
+        {valueIsMoreThanBalance && <ErrorText text="Saldo insuficiente" />}
+      </View>
     </TouchableOpacity>
   );
 }

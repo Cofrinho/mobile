@@ -1,31 +1,72 @@
 import Button from '@/components/Button';
+import ErrorText from '@/components/ErrorText';
 import MoneyText from '@/components/MoneyText';
+import Colors from '@/constants/colors';
+import api from '@/services/api';
+import institutionService from '@/services/institutions';
+import openFinanceService from '@/services/open-finance';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-const institution = {
-  id: '1',
-  name: 'Nubank',
-  logo: 'https://cdn-1.webcatalog.io/catalog/nubank/nubank-icon-filled-256.png?v=1745196590866',
-  color: '#831bd1',
-};
-
-const account = {
-  institutionName: 'Banco do Brasil',
-  account: '00458231',
-  agency: '1743',
-  balance: 10000,
-};
+import LottieView from 'lottie-react-native';
 
 export default function BankAppPayment() {
   const router = useRouter();
 
-  const { id, value } = useLocalSearchParams();
+  const { id, userId, value, institutionName, account, agency, logo } = useLocalSearchParams();
+
+  const [color, setColor] = useState<string>();
+
+  useEffect(() => {
+    async function GetInstitutionColor() {
+      const institutionColor = (await institutionService.findAll()).find(
+        (i) => i.id == Number(id),
+      )?.color;
+      setColor(institutionColor);
+    }
+    GetInstitutionColor();
+  }, []);
+
+  const [paymentConfirmData, setPaymentConfirmData] = useState();
+  const [loading, setLoading] = useState<boolean>();
+  const [error, setError] = useState();
+
+  const paymentConfirm = async () => {
+    try {
+      setLoading(true);
+
+      const data = await openFinanceService.confirmPayment({
+        userId: Number(userId),
+        institutionId: Number(id),
+        value: Number(value) / 100,
+      });
+
+      setPaymentConfirmData(data);
+    } catch (error: any) {
+      setError(error.response?.data?.errors || error.message);
+      return;
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+        router.push('/add-funds/successfull');
+      }, 1500);
+    }
+  };
+
+  const animation = useRef<LottieView>(null);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: institution.color, gap: 16 }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: color, gap: 16 }]}>
       <View
         style={{
           display: 'flex',
@@ -37,7 +78,12 @@ export default function BankAppPayment() {
         <ChevronLeft color={'#fff'} onPress={() => router.back()} />
       </View>
 
-      <Image source={{ uri: institution.logo }} width={96} height={96} />
+      <Image
+        source={{ uri: logo.toString() }}
+        width={96}
+        height={96}
+        style={{ borderRadius: 100 }}
+      />
 
       <View
         style={{ width: '100%', backgroundColor: '#fff', padding: 12, borderRadius: 10, gap: 8 }}
@@ -49,9 +95,9 @@ export default function BankAppPayment() {
           />
           <Text style={{ fontWeight: 'bold' }}>Pagamento via Open Finance</Text>
         </View>
-        <Text>Instituicão: {account.institutionName}</Text>
-        <Text>Conta: {account.account}</Text>
-        <Text>Agência: {account.agency}</Text>
+        <Text>Instituicão: {institutionName}</Text>
+        <Text>Conta: {account}</Text>
+        <Text>Agência: {agency}</Text>
         <MoneyText amount={Number(value) / 100} size={16} />
       </View>
 
@@ -59,8 +105,69 @@ export default function BankAppPayment() {
         text="CONFIRMAR PAGAMENTO"
         color="#fff"
         textColor="#000"
-        onPress={() => router.push('/add-funds/successfull')}
+        onPress={() => paymentConfirm()}
+        disabled={loading}
       />
+
+      {error && (
+        <View style={{ marginTop: 12 }}>
+          <ErrorText text={error} />
+        </View>
+      )}
+
+      {loading && (
+        <Modal transparent={true} visible={loading} animationType="fade">
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'rgba(0,0,0,0.3)',
+            }}
+          >
+            <TouchableOpacity
+              activeOpacity={1}
+              style={{ flex: 1, width: '100%', justifyContent: 'center', alignItems: 'center' }}
+            >
+              <View
+                style={{
+                  width: '80%',
+                  height: 'auto',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  backgroundColor: '#FFFFFF',
+                  padding: 20,
+                  borderRadius: 25,
+                }}
+                onStartShouldSetResponder={() => true}
+              >
+                <Text
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 'bold',
+                    marginBottom: 24,
+                    marginTop: 8,
+                    textAlign: 'center',
+                  }}
+                >
+                  Adicionando saldo no cofrinho
+                </Text>
+
+                <LottieView
+                  autoPlay
+                  loop
+                  ref={animation}
+                  style={{
+                    width: 200,
+                    height: 200,
+                  }}
+                  source={require('@/assets/animations/piggybank.json')}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
@@ -74,6 +181,7 @@ const styles = StyleSheet.create({
     zIndex: -2,
     display: 'flex',
     alignItems: 'center',
+    position: 'relative',
   },
   header: {
     position: 'relative',

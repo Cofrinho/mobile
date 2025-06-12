@@ -96,6 +96,21 @@ const openFinanceService = {
   revokeConsent: async (consentId: number | undefined) => {
     const { data } = await api.delete(`/open-finance/consents/${consentId}`);
   },
+  confirmPayment: async ({
+    userId,
+    institutionId,
+    value,
+  }: {
+    userId: number;
+    institutionId: number;
+    value: number;
+  }) => {
+    const { data } = await api.post(
+      `/open-finance/users/${userId}/institutions/${institutionId}/recharge`,
+      { amount: value },
+    );
+    return data;
+  },
 };
 
 export default openFinanceService;
