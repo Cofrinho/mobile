@@ -1,29 +1,50 @@
 import Button from '@/components/Button';
+import institutionService from '@/services/institutions';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const institution = {
-  id: '1',
-  name: 'Nubank',
-  logo: 'https://cdn-1.webcatalog.io/catalog/nubank/nubank-icon-filled-256.png?v=1745196590866',
-  color: '#831bd1',
-};
-
-const account = {
-  institutionName: 'Banco do Brasil',
-  account: '00458231',
-  agency: '1743',
-};
+interface institution {
+  id: number;
+  name: string;
+  api_url: string;
+  logo_url: string;
+  color: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function BankApp() {
   const router = useRouter();
 
-  const { id } = useLocalSearchParams();
+  const { id, account, agency, start, expiration } = useLocalSearchParams();
+
+  const [institutions, setInstitutions] = useState([] as institution[]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState();
+
+  useEffect(() => {
+    const fetchInstitutions = async () => {
+      try {
+        const data = await institutionService.findAll();
+        setInstitutions(data);
+        return data;
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInstitutions();
+  }, []);
+
+  const institution = institutions.find((institution) => institution.id == Number(id));
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: institution.color, gap: 16 }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: institution?.color, gap: 16 }]}>
       <View
         style={{
           display: 'flex',
@@ -35,7 +56,14 @@ export default function BankApp() {
         <ChevronLeft color={'#fff'} onPress={() => router.back()} />
       </View>
 
-      <Image source={{ uri: institution.logo }} width={96} height={96} />
+      {institution && (
+        <Image
+          source={{ uri: institution?.logo_url }}
+          width={96}
+          height={96}
+          style={{ backgroundColor: '#fff', borderRadius: 100 }}
+        />
+      )}
 
       <View
         style={{ width: '100%', backgroundColor: '#fff', padding: 12, borderRadius: 10, gap: 8 }}
@@ -47,16 +75,16 @@ export default function BankApp() {
           />
           <Text style={{ fontWeight: 'bold' }}>Compartilhamento via Open Finance</Text>
         </View>
-        <Text>Instituicão: {account.institutionName}</Text>
-        <Text>Conta: {account.account}</Text>
-        <Text>Agência: {account.agency}</Text>
+        <Text>Instituicão: {institution?.name}</Text>
+        <Text>Conta: {account}</Text>
+        <Text>Agência: {agency}</Text>
       </View>
 
       <Button
         text="COMPARTILHAR DADOS"
         color="#fff"
         textColor="#000"
-        onPress={() => router.push('/(open-finance)/link-successfull/${id}')}
+        onPress={() => router.push(`/(open-finance)/open-finance`)}
       />
     </SafeAreaView>
   );

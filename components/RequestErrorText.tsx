@@ -3,7 +3,7 @@ import { TriangleAlert } from 'lucide-react-native';
 import { Text, TextProps, View } from 'react-native';
 
 type props = TextProps & {
-  text: string;
+  text: string | undefined;
 };
 
 export default function RequestErrorText({ text }: props) {

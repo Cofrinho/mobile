@@ -1,8 +1,8 @@
 import Colors from '@/constants/colors';
-import { Image, Text, View } from 'react-native';
+import { Image, Text, TouchableOpacity, TouchableOpacityProps, View } from 'react-native';
 import MoneyText from './MoneyText';
 
-type props = {
+type props = TouchableOpacityProps & {
   logo: string;
   name: string;
   agency: string;
@@ -10,9 +10,10 @@ type props = {
   amount: number;
 };
 
-export default function OFAccountCard({ logo, name, agency, account, amount }: props) {
+export default function OFAccountCard({ logo, name, agency, account, amount, ...props }: props) {
   return (
-    <View
+    <TouchableOpacity
+      {...props}
       style={{
         display: 'flex',
         flexDirection: 'row',
@@ -50,6 +51,6 @@ export default function OFAccountCard({ logo, name, agency, account, amount }: p
       </View>
 
       <MoneyText amount={amount} color={Colors.black} size={16} />
-    </View>
+    </TouchableOpacity>
   );
 }

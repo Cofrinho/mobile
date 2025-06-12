@@ -10,6 +10,7 @@ interface props {
   textColor?: string;
   center?: boolean;
   uppercase?: boolean;
+  disabled?: boolean;
 }
 
 export default function Button({
@@ -20,6 +21,7 @@ export default function Button({
   textColor,
   center = true,
   uppercase = true,
+  disabled = false,
 }: props) {
   return (
     <TouchableOpacity
@@ -29,6 +31,7 @@ export default function Button({
         center ? { justifyContent: 'center' } : { justifyContent: 'flex-start' },
       ]}
       onPress={onPress}
+      disabled={disabled}
     >
       {icon}
       <Text

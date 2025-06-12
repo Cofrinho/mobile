@@ -2,20 +2,16 @@ import Button from '@/components/Button';
 import CircleIconButton from '@/components/CircleIconButton';
 import Input from '@/components/Input';
 import Colors from '@/constants/colors';
+import { AuthContext } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { Undo2 } from 'lucide-react-native';
+import { useContext } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-
-const user = {
-  avatar: '',
-  name: 'Usuário da Silva',
-  email: 'usuario@gmail.com',
-  phone: '(55) 99293-9329',
-  birthdate: '22/01/2004',
-};
 
 export default function UserEdit() {
   const router = useRouter();
+
+  const { user } = useContext(AuthContext);
 
   return (
     <View style={styles.container}>
@@ -29,29 +25,29 @@ export default function UserEdit() {
 
       <View style={styles.contentContainer}>
         <View style={styles.userContainer}>
-          {user && user.avatar ? (
-            <Image src={user.avatar} />
+          {user && user.avatar_url ? (
+            <Image src={user.avatar_url} />
           ) : (
             <View style={styles.avatarContainer}>
-              <Text style={styles.usernameAvatar}>{user.name[0]}</Text>
+              <Text style={styles.usernameAvatar}>{user?.name[0]}</Text>
             </View>
           )}
 
           <View>
-            <Text style={styles.username}>{user.name}</Text>
-            <Text style={styles.email}>{user.email}</Text>
+            <Text style={styles.username}>{user?.name}</Text>
+            <Text style={styles.email}>{user?.email}</Text>
           </View>
         </View>
 
         <View style={{ flex: 1, display: 'flex', width: '100%' }}>
           <View style={{ gap: 4 }}>
             <Text style={styles.label}>Nome</Text>
-            <Input placeholder="nome" />
+            <Input placeholder="nome" value={user?.name} />
           </View>
 
           <View style={{ gap: 4 }}>
             <Text style={styles.label}>Email</Text>
-            <Input placeholder="email" />
+            <Input placeholder="email" value={user?.email} />
           </View>
 
           <View style={{ gap: 4 }}>

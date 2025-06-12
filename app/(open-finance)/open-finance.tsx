@@ -1,49 +1,94 @@
+import AnimatedView from '@/components/AnimatedView';
 import Button from '@/components/Button';
 import CircleIconButton from '@/components/CircleIconButton';
 import OFAccountCard from '@/components/OFAccountCard';
 import Colors from '@/constants/colors';
-import { useRouter } from 'expo-router';
+import openFinanceService from '@/services/open-finance';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Undo2 } from 'lucide-react-native';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
 
-const accounts = [
-  {
-    id: '1',
-    logo: 'https://designconceitual.com.br/wp-content/uploads/2023/12/Ita%C3%BA-novo-logotipo-2023-1000x600.jpg',
-    name: 'Itaú',
-    amount: 1000,
-    account: '124938439',
-    agency: '0001',
-  },
-  {
-    id: '2',
-    logo: 'https://cdn-1.webcatalog.io/catalog/nubank/nubank-icon-filled-256.png?v=1745196590866',
-    name: 'Nubank',
-    amount: 324,
-    account: '99763525',
-    agency: '0001',
-  },
-];
+function formatDatetime(dateStr: string): string {
+  const date = new Date(dateStr);
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+
+  return `${day}/${month}/${year} - ${hours}:${minutes}`;
+}
+
+function formatDate(dateStr: string) {
+  if (dateStr == null) return null;
+
+  const date = new Date(dateStr);
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+
+  return `${day}/${month}/${year}`;
+}
 
 interface account {
-  id: string;
-  logo: string;
-  name: string;
-  amount: number;
+  logo_url: string;
+  institutionName: string;
+  balance: number;
   account: string;
   agency: string;
+  expirationDate: string;
+  startDate: string;
+}
+
+interface totalBalanceResponse {
+  balanceTotal: number;
+  accounts: account[];
 }
 
 export default function OpenFinance() {
   const router = useRouter();
 
+  const [institutions, setInstitutions] = useState({} as totalBalanceResponse);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState();
+
+  const [hasAccount, setHasAccount] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchInstitutions = async () => {
+        try {
+          const data = await openFinanceService.getDetailedBalance();
+          setInstitutions(data);
+          setHasAccount(true);
+          return data;
+        } catch (error: any) {
+          setError(error.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchInstitutions();
+    }, []),
+  );
+
   const renderItem = ({ item }: { item: account }) => (
     <OFAccountCard
-      logo={item.logo}
-      name={item.name}
-      amount={item.amount}
+      logo={item.logo_url}
+      name={item.institutionName}
+      amount={item.balance}
       account={item.account}
       agency={item.agency}
+      onPress={() =>
+        router.push(
+          `/(open-finance)/link-successfull/1?logo=${item.logo_url}&institution=${item.institutionName}&start=${formatDatetime(item.startDate)}&expiration=${formatDate(item.expirationDate)}`,
+        )
+      }
     />
   );
 
@@ -53,7 +98,7 @@ export default function OpenFinance() {
         <CircleIconButton
           color={Colors.secondary}
           icon={<Undo2 size={24} color={Colors.primary} />}
-          onPress={() => router.back()}
+          onPress={() => router.push('/(tabs)/account')}
         />
 
         <View style={styles.titleContainer}>
@@ -68,17 +113,32 @@ export default function OpenFinance() {
 
       <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Contas conectadas</Text>
 
-      <FlatList
-        data={accounts}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={{ paddingVertical: 12 }}
-        ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-        showsVerticalScrollIndicator={false}
-        style={{ flexGrow: 0 }}
-      />
+      {institutions && !loading && !error && (
+        <FlatList
+          data={institutions.accounts}
+          keyExtractor={(item) => item.balance.toString()}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingVertical: 12 }}
+          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+          showsVerticalScrollIndicator={false}
+          style={{ flexGrow: 0 }}
+        />
+      )}
 
-      <Button text="adicionar conta" onPress={() => router.push('/(open-finance)/link-account')} />
+      {loading && <AnimatedView width={'100%'} height={70} marginVertical={12} />}
+
+      {error && (
+        <Text
+          style={{ marginVertical: 12, fontWeight: 'bold', color: Colors.lightGray, fontSize: 16 }}
+        >
+          Nenhuma conta encontrada
+        </Text>
+      )}
+
+      <Button
+        text="adicionar conta"
+        onPress={() => router.push(`/(open-finance)/link-account?hasAccount=${hasAccount}`)}
+      />
     </View>
   );
 }

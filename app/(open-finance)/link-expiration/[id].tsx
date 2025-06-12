@@ -3,22 +3,67 @@ import CircleIconButton from '@/components/CircleIconButton';
 import OFInstitutionCard from '@/components/OFInstitutionCard';
 import RadioButtonGroup from '@/components/RadioButtonGroup';
 import Colors from '@/constants/colors';
+import { AuthContext } from '@/contexts/AuthContext';
+import openFinanceService from '@/services/open-finance';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Undo2 } from 'lucide-react-native';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
-const institution = {
-  id: '2',
-  name: 'Itaú',
-  logo: 'https://designconceitual.com.br/wp-content/uploads/2023/12/Ita%C3%BA-novo-logotipo-2023-1000x600.jpg',
+const getFormattedDateTime = () => {
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // meses são 0-based
+  const year = now.getFullYear();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+
+  return `${day}/${month}/${year} - ${hours}:${minutes}`;
+};
+
+const getFormattedDate = (expiration: number) => {
+  const now = new Date();
+  const futureDate = new Date(now);
+  futureDate.setMonth(futureDate.getMonth() + expiration);
+
+  const day = String(futureDate.getDate()).padStart(2, '0');
+  const month = String(futureDate.getMonth() + 1).padStart(2, '0');
+  const year = futureDate.getFullYear();
+
+  return `${day}/${month}/${year}`;
 };
 
 export default function LinkExpiration() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const { user } = useContext(AuthContext);
+  const { id, name, logo } = useLocalSearchParams();
 
   const [expirationTimeValue, setExpirationTimeValue] = useState('option1');
+
+  const [loading, setLoading] = useState(false);
+
+  const createConsent = async () => {
+    try {
+      setLoading(true);
+
+      const data = await openFinanceService.createConsent({
+        userId: Number(user?.id),
+        institutionId: Number(id),
+        expirationTime: expirationTimeValue,
+      });
+
+      router.push(
+        `/(bank-app)/open-finance/${id}?agency=${data.agency}&account=${data.account_number}&institution=${name}&start=${getFormattedDateTime()}&expiration=${expirationTimeValue == '0' ? 'Indeterminado' : getFormattedDate(Number(expirationTimeValue))}`,
+      );
+
+      return;
+    } catch (error: any) {
+      console.log(error.response.data);
+      console.log(error.message);
+    } finally {
+      setLoading((prev) => (prev = false));
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -31,7 +76,7 @@ export default function LinkExpiration() {
 
         <View style={styles.titleContainer}>
           <Image
-            source={require('../../../assets/images/open-finance.png')}
+            source={require('@/assets/images/open-finance.png')}
             style={{ width: 24, height: 24 }}
           />
 
@@ -44,9 +89,9 @@ export default function LinkExpiration() {
           <Text style={{ color: Colors.primary, fontWeight: '700' }}>Instituição selecionada</Text>
 
           <OFInstitutionCard
-            logo={institution.logo}
-            id={institution.id}
-            name={institution.name}
+            logo={logo.toString()}
+            id={id.toString()}
+            name={name.toString()}
             showIcon={false}
             activeOpacity={1}
           />
@@ -68,7 +113,7 @@ export default function LinkExpiration() {
         </View>
       </View>
 
-      <Button text="CONFIRMAR" onPress={() => router.push(`/(bank-app)/open-finance/${id}`)} />
+      <Button text="CONFIRMAR" disabled={loading} onPress={() => createConsent()} />
     </View>
   );
 }

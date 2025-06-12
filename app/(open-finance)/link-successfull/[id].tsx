@@ -1,29 +1,58 @@
 import Button from '@/components/Button';
 import CircleIconButton from '@/components/CircleIconButton';
+import RequestErrorText from '@/components/RequestErrorText';
 import Colors from '@/constants/colors';
+import { AuthContext } from '@/contexts/AuthContext';
+import institutionService from '@/services/institutions';
+import openFinanceService from '@/services/open-finance';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Undo2, X } from 'lucide-react-native';
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-const institution = {
-  id: '2',
-  name: 'Itaú',
-  logo: 'https://designconceitual.com.br/wp-content/uploads/2023/12/Ita%C3%BA-novo-logotipo-2023-1000x600.jpg',
-};
-
-const expiration = {
-  linkDate: '22/01/2025 - 13:41',
-  expirationDate: '16/06/2025',
-};
 
 export default function LinkSuccessfull() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const { id, logo, institution, expiration, start } = useLocalSearchParams();
+
+  const { user } = useContext(AuthContext);
 
   const [linkCancelModal, setLinkCancelModal] = useState(false);
 
   const [expirationTimeValue, setExpirationTimeValue] = useState('option1');
+
+  const [consentData, setConsentData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState();
+
+  const [consentId, setConsentId] = useState<number>();
+
+  useEffect(() => {
+    async function fetchConsentId() {
+      try {
+        const institutionsData = await institutionService.findAll();
+
+        const institutionId = institutionsData.find((item) => item.name == institution)?.id;
+
+        const data = await openFinanceService.getAllConsents(user?.id);
+        const consId = data.find((consent) => consent.institution_id == institutionId)?.id;
+        setConsentId(consId);
+      } catch (error: any) {
+        setError(error.message);
+      }
+    }
+
+    fetchConsentId();
+  }, []);
+
+  const revokeConsent = async () => {
+    try {
+      await openFinanceService.revokeConsent(consentId);
+    } catch (error: any) {
+      setError(error.response.data.error);
+    } finally {
+      setLinkCancelModal(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -31,7 +60,7 @@ export default function LinkSuccessfull() {
         <CircleIconButton
           color={Colors.secondary}
           icon={<Undo2 size={24} color={Colors.primary} />}
-          onPress={() => router.push('/(tabs)/account')}
+          onPress={() => router.back()}
         />
 
         <View style={styles.titleContainer}>
@@ -46,12 +75,12 @@ export default function LinkSuccessfull() {
 
       <View style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', gap: 6 }}>
         <Image
-          source={{ uri: institution.logo }}
+          source={{ uri: logo.toString() }}
           width={64}
           height={64}
           style={{ borderRadius: 100 }}
         />
-        <Text style={{ fontWeight: 'bold' }}>{institution.name}</Text>
+        <Text style={{ fontWeight: 'bold' }}>{institution}</Text>
       </View>
 
       <View style={{ gap: 16, flex: 1, marginTop: 40 }}>
@@ -59,12 +88,16 @@ export default function LinkSuccessfull() {
           <Text style={{ color: Colors.primary, fontWeight: '700' }}>
             Início do compartilhamento
           </Text>
-          <Text style={{ fontWeight: 'bold' }}>{expiration.linkDate}</Text>
+          <Text style={{ fontWeight: 'bold' }}>{start}</Text>
         </View>
 
         <View style={{ gap: 4 }}>
           <Text style={{ color: Colors.primary, fontWeight: '700' }}>Dados expiram em</Text>
-          <Text style={{ fontWeight: 'bold' }}>{expiration.expirationDate}</Text>
+          <Text style={{ fontWeight: 'bold' }}>
+            {expiration === null || expiration == 'null' ? 'Indeterminado' : expiration}
+          </Text>
+
+          {error && <RequestErrorText text={error} />}
         </View>
       </View>
 
@@ -141,7 +174,7 @@ export default function LinkSuccessfull() {
                     text="Cancelar"
                     color={Colors.lightGray2}
                     textColor={Colors.red}
-                    onPress={() => setLinkCancelModal(false)}
+                    onPress={() => revokeConsent()}
                   />
                 </View>
               </View>

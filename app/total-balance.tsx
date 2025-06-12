@@ -1,50 +1,55 @@
+import AnimatedView from '@/components/AnimatedView';
 import CircleIconButton from '@/components/CircleIconButton';
 import MoneyText from '@/components/MoneyText';
 import OFAccountCard from '@/components/OFAccountCard';
 import Colors from '@/constants/colors';
+import openFinanceService from '@/services/open-finance';
 import { useRouter } from 'expo-router';
 import { Undo2 } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-const accounts = [
-  {
-    id: '1',
-    logo: 'sss',
-    name: 'Itaú',
-    amount: 1000,
-    account: '124938439',
-    agency: '0001',
-  },
-  {
-    id: '2',
-    logo: 'sss',
-    name: 'Nubank',
-    amount: 324,
-    account: '99763525',
-    agency: '0001',
-  },
-];
-
-const totalAmount = 1324;
-
 interface account {
-  id: string;
-  logo: string;
-  name: string;
-  amount: number;
+  logo_url: string;
+  institutionName: string;
+  balance: number;
   account: string;
   agency: string;
+}
+
+interface totalBalanceResponse {
+  balanceTotal: number;
+  accounts: account[];
 }
 
 export default function TotalBalance() {
   const router = useRouter();
 
+  const [institutions, setInstitutions] = useState({} as totalBalanceResponse);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState();
+
+  useEffect(() => {
+    const fetchInstitutions = async () => {
+      try {
+        const data = await openFinanceService.getDetailedBalance();
+        setInstitutions(data);
+        return data;
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInstitutions();
+  }, []);
+
   const renderItem = ({ item }: { item: account }) => (
     <OFAccountCard
-      logo={item.logo}
-      name={item.name}
-      amount={item.amount}
+      logo={item.logo_url}
+      name={item.institutionName}
+      amount={item.balance}
       account={item.account}
       agency={item.agency}
     />
@@ -63,20 +68,28 @@ export default function TotalBalance() {
         </View>
 
         <View style={styles.amountContainer}>
-          <Text style={styles.amount}>
-            <MoneyText amount={totalAmount} color={Colors.black} size={32} />
-          </Text>
+          {institutions && !loading ? (
+            <Text style={styles.amount}>
+              <MoneyText amount={institutions.balanceTotal} color={Colors.black} size={32} />
+            </Text>
+          ) : (
+            <AnimatedView width={150} height={40} />
+          )}
         </View>
 
-        <FlatList
-          data={accounts}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          style={styles.institutions}
-          contentContainerStyle={{ paddingVertical: 12 }}
-          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-          showsVerticalScrollIndicator={false}
-        />
+        {institutions && !loading ? (
+          <FlatList
+            data={institutions.accounts}
+            keyExtractor={(item, index) => item.balance.toString()}
+            renderItem={renderItem}
+            style={styles.institutions}
+            contentContainerStyle={{ paddingVertical: 12 }}
+            ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+            showsVerticalScrollIndicator={false}
+          />
+        ) : (
+          <AnimatedView width={'100%'} height={70} marginTop={40} />
+        )}
       </View>
     </SafeAreaView>
   );
