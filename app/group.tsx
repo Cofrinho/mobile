@@ -166,7 +166,7 @@ export default function GroupDetails() {
 
             <TouchableOpacity
               style={styles.participants}
-              onPress={() => router.push('/groupMembers')}
+              onPress={() => router.push({ pathname: '/groupMembers', params: { id: group.id } })}
             >
               <Users2 size={20} color={Colors.primary} />
               <Text style={styles.participantCount}>{group.participants.length}</Text>

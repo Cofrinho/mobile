@@ -32,6 +32,10 @@ const groupService = {
     const response = await api.delete(`/groups/${groupId}`);
     return response.data;
   },
+  getMembers: async (groupId: string) => {
+    const response = await api.get(`/participants/group/${groupId}`);
+    return response.data;
+  },
 };
 
 export default groupService;

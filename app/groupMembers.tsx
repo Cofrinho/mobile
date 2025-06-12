@@ -1,88 +1,106 @@
 import CircleIconButton from '@/components/CircleIconButton';
 import Colors from '@/constants/colors';
-import { router } from 'expo-router';
+import { AuthContext } from '@/contexts/AuthContext';
+import groupService from '@/services/group';
+import { router, useLocalSearchParams } from 'expo-router';
 import { LogOut, Star, Undo2 } from 'lucide-react-native';
+import { useContext, useEffect, useState } from 'react';
 import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+interface Group {
+  id: number;
+  name: string;
+  description: string;
+  access_code: string;
+  image_url: string | null;
+  group_owner: number;
+  balance: string;
+  expenses: Array<{
+    id: string;
+    name: string;
+    total: number;
+    created_at: string;
+    updated_at: string;
+    group_id: number;
+    user_id: number;
+  }>;
+  participants: Array<{
+    id: number;
+    name: string;
+    email: string;
+    avatar_url: string | null;
+    created_at: string;
+    updated_at: string;
+  }>;
+}
 
 interface GroupMember {
   id: string;
   name: string;
   avatar: string;
-  dateJoined: string;
+  joinedAt: string;
   isGroupOwner: boolean;
 }
 
-const groupMembersArray = [
-  {
-    id: '1',
-    name: 'Usuário da Silva',
-    avatar: 'https://i.pravatar.cc/100?img=3',
-    dateJoined: '2023-10-01',
-    isGroupOwner: true,
-  },
-  {
-    id: '2',
-    name: 'Maria Oliveira',
-    avatar: 'https://i.pravatar.cc/100?img=4',
-    dateJoined: '2023-10-02',
-    isGroupOwner: false,
-  },
-  {
-    id: '3',
-    name: 'João Pereira',
-    avatar: 'https://i.pravatar.cc/100?img=5',
-    dateJoined: '2023-10-03',
-    isGroupOwner: false,
-  },
-  {
-    id: '4',
-    name: 'Ana Costa',
-    avatar: 'https://i.pravatar.cc/100?img=6',
-    dateJoined: '2023-10-04',
-    isGroupOwner: false,
-  },
-  {
-    id: '5',
-    name: 'Carlos Souza',
-    avatar: 'https://i.pravatar.cc/100?img=7',
-    dateJoined: '2023-10-05',
-    isGroupOwner: false,
-  },
-  {
-    id: '6',
-    name: 'Fernanda Lima',
-    avatar: 'https://i.pravatar.cc/100?img=8',
-    dateJoined: '2023-10-06',
-    isGroupOwner: false,
-  },
-  {
-    id: '7',
-    name: 'Ricardo Santos',
-    avatar: 'https://i.pravatar.cc/100?img=9',
-    dateJoined: '2023-10-07',
-    isGroupOwner: false,
-  },
-  {
-    id: '8',
-    name: 'Patrícia Almeida',
-    avatar: 'https://i.pravatar.cc/100?img=10',
-    dateJoined: '2023-10-08',
-    isGroupOwner: false,
-  },
-];
-
-const isGroupOwner = true;
-
 export default function GroupMembers() {
+  const { user } = useContext(AuthContext);
+  const { id } = useLocalSearchParams() as { id: string };
+  const [loading, setLoading] = useState(false);
+  const [group, setGroup] = useState<Group | null>(null);
+  const [members, setMembers] = useState<GroupMember[]>([]);
+  const isGroupOwner = group?.group_owner === user?.id;
+
+  useEffect(() => {
+    if (!user) {
+      console.error('Usuário não autenticado.');
+      return;
+    }
+
+    const fetchGroups = async () => {
+      setLoading(true);
+      try {
+        const response = await groupService.getById(id);
+        setGroup(response);
+      } catch (error) {
+        console.error('Error fetching groups:', error);
+        setGroup(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGroups();
+  }, [user]);
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      if (!group) return;
+      setLoading(true);
+      try {
+        const response = await groupService.getMembers(group.id.toString());
+        setMembers(response);
+      } catch (error) {
+        console.error('Error fetching group members:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMembers();
+  }, [group]);
+
   const renderItem = ({ item }: { item: GroupMember }) => (
     <View style={styles.memberCard}>
-      <Image source={{ uri: item.avatar }} style={styles.memberCardAvatar} />
+      <Image
+        source={{ uri: item.avatar ? item.avatar : 'https://i.sstatic.net/l60Hf.png' }}
+        style={styles.memberCardAvatar}
+      />
       <View>
         <Text style={styles.memberCardTitle}>{item.name}</Text>
         <Text style={styles.memberCardSubTitle}>
-          Entrou em
-          {new Date(item.dateJoined).toLocaleDateString('pt-BR', {
+          Entrou em{' '}
+          {new Date(item.joinedAt).toLocaleDateString('pt-BR', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
@@ -122,16 +140,26 @@ export default function GroupMembers() {
           />
           <Text style={styles.title}>Membros</Text>
         </View>
-        <View style={styles.membersList}>
-          <FlatList
-            data={groupMembersArray}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            ListEmptyComponent={() => (
-              <Text style={{ textAlign: 'center', marginTop: 20 }}>Nenhum membro encontrado</Text>
-            )}
-          />
-        </View>
+        {loading ? (
+          <Text>Carregando...</Text>
+        ) : (
+          <View style={styles.membersList}>
+            <FlatList
+              data={members}
+              keyExtractor={(item) => item.id}
+              renderItem={renderItem}
+              ListEmptyComponent={
+                !loading
+                  ? () => (
+                      <Text style={{ textAlign: 'center', marginTop: 20 }}>
+                        Nenhum membro encontrado
+                      </Text>
+                    )
+                  : null
+              }
+            />
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
