@@ -38,7 +38,7 @@ export default function OFInstitutionCard({
           }}
           width={48}
           height={48}
-          style={{ borderRadius: 100, objectFit: 'cover' }}
+          style={{ borderRadius: 100, resizeMode: 'cover', backgroundColor: Colors.lightGray2 }}
         />
         <View>
           <Text style={{ fontWeight: 'bold' }}>{name}</Text>
