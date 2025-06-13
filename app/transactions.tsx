@@ -1,44 +1,53 @@
 import CircleIconButton from '@/components/CircleIconButton';
 import TransactionCard from '@/components/TransactionCard';
 import Colors from '@/constants/colors';
+import transactionService from '@/services/transactions';
 import { useRouter } from 'expo-router';
 import { Undo2 } from 'lucide-react-native';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const transactionsArray = [
-  {
-    id: '1',
-    operation: 'in',
-    title: 'Recarga cofrinho',
-    value: 49,
-    date: '07 abr. • 15:30',
-  },
-  {
-    id: '2',
-    operation: 'out',
-    title: 'Racha churras',
-    value: 75,
-    date: '07 abr. • 15:30',
-    group: '1',
-  },
-];
-
-interface transaction {
+interface Transaction {
   id: string;
+  type: string;
   title: string;
   value: number;
-  operation: string;
-  date: string;
+  date?: string;
   group?: string;
 }
 
 export default function Transactions() {
   const router = useRouter();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const renderItem = ({ item }: { item: transaction }) => (
-    <TransactionCard operation={item.operation} title={item.title} value={item.value} />
+  useEffect(() => {
+    async function loadTransactions() {
+      try {
+        const data = await transactionService.getTransactionsNoLimit();
+
+        setTransactions(data);
+      } catch (error) {
+        console.error('Error loading transactions:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadTransactions();
+  }, []);
+
+  const renderItem = ({ item }: { item: Transaction }) => (
+    <TransactionCard type={item.type} title={item.title} value={item.value} />
   );
+
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -53,7 +62,7 @@ export default function Transactions() {
         </View>
 
         <FlatList
-          data={transactionsArray}
+          data={transactions}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={{ gap: 12, paddingBottom: 16 }}

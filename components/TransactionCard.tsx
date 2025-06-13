@@ -5,13 +5,13 @@ import { Text, TouchableOpacity, TouchableOpacityProps, View } from 'react-nativ
 import MoneyText from './MoneyText';
 
 type props = TouchableOpacityProps & {
-  operation: string;
+  type: string;
   title: string;
   value: number;
   group?: string;
 };
 
-export default function TransactionCard({ operation, title, value, group }: props) {
+export default function TransactionCard({ type, title, value, group }: props) {
   return (
     <TouchableOpacity
       style={{
@@ -36,7 +36,7 @@ export default function TransactionCard({ operation, title, value, group }: prop
             alignItems: 'center',
           }}
         >
-          {operation === 'in' ? (
+          {type === 'in' ? (
             <BanknoteArrowUp color={Colors.primary} />
           ) : (
             <BanknoteArrowDown color={Colors.primary} />
@@ -47,11 +47,11 @@ export default function TransactionCard({ operation, title, value, group }: prop
           <Text style={{ color: Colors.lightGray, fontWeight: 'bold' }}>{title}</Text>
 
           <View style={{ display: 'flex', flexDirection: 'row', gap: 2, alignItems: 'center' }}>
-            {operation === 'in' ? (
+            {type === 'in' ? (
               <Text
                 style={{
                   fontWeight: 'semibold',
-                  color: operation === 'in' ? Colors.green : Colors.red,
+                  color: type === 'in' ? Colors.green : Colors.red,
                 }}
               >
                 +
@@ -60,17 +60,13 @@ export default function TransactionCard({ operation, title, value, group }: prop
               <Text
                 style={{
                   fontWeight: 'semibold',
-                  color: operation === 'in' ? Colors.green : Colors.red,
+                  color: type === 'in' ? Colors.green : Colors.red,
                 }}
               >
                 -
               </Text>
             )}
-            <MoneyText
-              amount={value}
-              color={operation === 'in' ? Colors.green : Colors.red}
-              size={12}
-            />
+            <MoneyText amount={value} color={type === 'in' ? Colors.green : Colors.red} size={12} />
           </View>
         </View>
       </View>
