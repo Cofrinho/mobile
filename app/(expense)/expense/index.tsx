@@ -156,19 +156,21 @@ export default function ExpenseDetail() {
                     borderRadius: 100,
                   }}
                 >
-                  <View
-                    style={{
-                      width: `${(Number(expense?.balance) / Number(expense?.value)) * 100}%`,
-                      backgroundColor: Colors.primary,
-                      height: 20,
-                      borderTopStartRadius: 100,
-                      borderEndStartRadius: 100,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'flex-end',
-                      paddingEnd: 4,
-                    }}
-                  ></View>
+                  {expense?.balance != 0 && (
+                    <View
+                      style={{
+                        width: `${(Number(expense?.balance) / Number(expense?.value)) * 100}%`,
+                        backgroundColor: Colors.primary,
+                        height: 20,
+                        borderTopStartRadius: 100,
+                        borderEndStartRadius: 100,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'flex-end',
+                        paddingEnd: 4,
+                      }}
+                    ></View>
+                  )}
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
