@@ -3,9 +3,9 @@ import api from './api';
 export interface Expense {
   id: number;
   groupId: number;
-  title: string;
+  name: string;
   description: string;
-  amount: number;
+  value: number;
   balance: number;
   status: string;
   paidAt: string;
@@ -45,7 +45,7 @@ export const ExpenseService = {
     const { data } = await api.post(`/groups/${groupId}/expenses`, createExpenseData);
     return data;
   },
-  getExpenseDetails: async (groupId: number, expenseId: string) => {
+  getExpenseDetails: async (groupId: number, expenseId: string): Promise<Expense> => {
     const { data } = await api.get(`/groups/${groupId}/expenses/${expenseId}`);
     return data;
   },

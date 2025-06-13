@@ -11,23 +11,6 @@ import { useCallback, useContext, useState } from 'react';
 import { FlatList, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const groupArray = {
-  id: '1',
-  name: 'Churrascada',
-  image:
-    'https://minervafoods.com/wp-content/uploads/2023/02/Acompanhamento-para-churrasco-confira-8-opcoes-saborosas-scaled.jpg',
-  organizer: {
-    name: 'Usuário da Silva',
-    avatar: 'https://i.pravatar.cc/100?img=3',
-  },
-  participants: 7,
-  access_code: '1A3F',
-  expenses: [
-    { id: '1', name: 'Racha Picanha', total: 130 },
-    { id: '2', name: 'Racha Cerveja', total: 150 },
-  ],
-};
-
 interface Group {
   id: number;
   name: string;
@@ -70,12 +53,6 @@ export default function GroupDetails() {
   const isGroupOwner = group?.group_owner === user?.id;
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [leaveModalVisible, setLeaveModalVisible] = useState(false);
-
-  const renderItem = ({ item }: { item: Expense }) => (
-    <TouchableOpacity onPress={() => router.push(`/(expense)/expense/${item.id}`)}>
-      <ExpensiveCard expensive={item} />
-    </TouchableOpacity>
-  );
 
   useFocusEffect(
     useCallback(() => {
@@ -120,6 +97,12 @@ export default function GroupDetails() {
       setLoading(false);
     }
   };
+
+  const renderItem = ({ item }: { item: Expense }) => (
+    <TouchableOpacity onPress={() => router.push(`/(expense)/expense?id=${item.id}&groupId=${id}`)}>
+      <ExpensiveCard expensive={item} />
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
