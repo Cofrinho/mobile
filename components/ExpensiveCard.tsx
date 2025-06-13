@@ -6,7 +6,7 @@ interface ExpensiveCardProps {
   expensive: {
     id: string;
     name: string;
-    total: number;
+    value: number;
   };
 }
 
@@ -19,7 +19,7 @@ export default function ExpensiveCard({ expensive }: ExpensiveCardProps) {
         </View>
         <View>
           <Text style={styles.title}>{expensive.name}</Text>
-          <Text style={styles.subTitle}>Total: R$ {expensive.total.toFixed(2)}</Text>
+          <Text style={styles.subTitle}>Total: R$ {expensive.value}</Text>
         </View>
       </View>
       <ChevronRight size={22} color={Colors.primary} />

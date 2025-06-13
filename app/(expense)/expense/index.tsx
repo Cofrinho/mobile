@@ -1,15 +1,35 @@
 import Button from '@/components/Button';
 import MoneyText from '@/components/MoneyText';
 import Colors from '@/constants/colors';
-import { useRouter } from 'expo-router';
+import { Expense, ExpenseService } from '@/services/expense';
+import {
+  useFocusEffect,
+  useGlobalSearchParams,
+  useLocalSearchParams,
+  useRouter,
+} from 'expo-router';
 import { Calendar, ReceiptText, Undo2 } from 'lucide-react-native';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-export default function Expense() {
+export default function ExpenseDetail() {
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState(1);
+
+  const { id, groupId } = useLocalSearchParams();
+
+  const [expense, setExpense] = useState<Expense>();
+
+  useFocusEffect(
+    useCallback(() => {
+      async function fetchExpenseDetails() {
+        const data = await ExpenseService.getExpenseDetails(Number(groupId), id.toString());
+        setExpense(data);
+      }
+      fetchExpenseDetails();
+    }, []),
+  );
 
   return (
     <View
@@ -90,7 +110,7 @@ export default function Expense() {
                     marginBottom: 8,
                   }}
                 >
-                  <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Racha Picanha</Text>
+                  <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>{expense?.name}</Text>
 
                   <View
                     style={{
@@ -103,7 +123,7 @@ export default function Expense() {
                     }}
                   >
                     <Text style={{ color: Colors.primary, fontWeight: '500', fontSize: 12 }}>
-                      Pendente
+                      {expense?.status}
                     </Text>
                   </View>
                 </View>
@@ -115,8 +135,7 @@ export default function Expense() {
                     flexWrap: 'wrap',
                   }}
                 >
-                  Racha da picanha dos guris do churrasco que vai ocorrer na casa do usuário da
-                  silva dia 20 de julho.
+                  {expense?.description}
                 </Text>
               </View>
             </View>
@@ -126,7 +145,7 @@ export default function Expense() {
                 Valor total
               </Text>
 
-              <MoneyText size={30} amount={350} />
+              <MoneyText size={30} amount={expense?.value} />
 
               <View style={{ gap: 4 }}>
                 <View
@@ -137,32 +156,36 @@ export default function Expense() {
                     borderRadius: 100,
                   }}
                 >
-                  <View
-                    style={{
-                      width: '50%',
-                      backgroundColor: Colors.primary,
-                      height: 20,
-                      borderTopStartRadius: 100,
-                      borderEndStartRadius: 100,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'flex-end',
-                      paddingEnd: 4,
-                    }}
-                  ></View>
+                  {expense?.balance != 0 && (
+                    <View
+                      style={{
+                        width: `${(Number(expense?.balance) / Number(expense?.value)) * 100}%`,
+                        backgroundColor: Colors.primary,
+                        height: 20,
+                        borderTopStartRadius: 100,
+                        borderEndStartRadius: 100,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'flex-end',
+                        paddingEnd: 4,
+                      }}
+                    ></View>
+                  )}
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <View style={{ flex: 1, alignItems: 'flex-start' }}>
-                    <MoneyText amount={30} size={14} />
+                    <MoneyText amount={expense?.balance} size={14} />
                   </View>
 
                   <View style={{ flex: 1, alignItems: 'center' }}>
-                    <Text style={{ fontWeight: 'bold' }}>50%</Text>
+                    <Text style={{ fontWeight: 'bold' }}>
+                      {(Number(expense?.balance) / Number(expense?.value)) * 100}%
+                    </Text>
                   </View>
 
                   <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                    <MoneyText amount={350} size={14} />
+                    <MoneyText amount={expense?.value} size={14} />
                   </View>
                 </View>
               </View>
@@ -199,7 +222,7 @@ export default function Expense() {
                   Vencimento
                 </Text>
                 <Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 12 }}>
-                  22/07/2025
+                  {expense?.dueDate}
                 </Text>
               </View>
             </View>

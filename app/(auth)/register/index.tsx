@@ -125,7 +125,6 @@ export default function Register() {
 
   const onSubmit = async (data: any) => {
     try {
-      console.log('Register data:', data);
       await register(data);
       setResponseError('');
       router.push('/(auth)/register/successfull');

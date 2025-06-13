@@ -96,6 +96,65 @@ export default function CreateExpenseTwo() {
     );
   };
 
+  const renderItemTwo = ({ item }: { item: Participant }) => {
+    return (
+      <TouchableOpacity
+        activeOpacity={1}
+        style={{
+          borderWidth: 1,
+          padding: 12,
+          borderRadius: 10,
+          borderColor: Colors.primary,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+          <Image
+            source={{ uri: item.image }}
+            style={{
+              backgroundColor: Colors.secondary,
+              width: 44,
+              height: 44,
+              borderRadius: 100,
+            }}
+          />
+          <Text style={{ color: Colors.primary, fontWeight: '500' }}>{item.name}</Text>
+        </View>
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 32 }}>
+          <View style={{ flexDirection: 'row', width: 40, gap: 4 }}>
+            <Input
+              style={{
+                fontWeight: 'bold',
+                fontSize: 16,
+                borderBottomWidth: 1,
+                borderBottomColor: Colors.primary,
+                textAlign: 'center',
+              }}
+              defaultValue="33"
+              inputMode="numeric"
+              keyboardType="numeric"
+            />
+
+            <Text style={{ fontWeight: 'bold', fontSize: 16 }}>%</Text>
+          </View>
+
+          <View>
+            <TouchableOpacity>
+              <ChevronUp />
+            </TouchableOpacity>
+
+            <TouchableOpacity>
+              <ChevronDown />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
