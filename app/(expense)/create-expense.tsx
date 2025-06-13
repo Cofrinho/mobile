@@ -6,10 +6,11 @@ import Stepper from '@/components/Stepper';
 import Colors from '@/constants/colors';
 import { CreateExpense, ExpenseService, GroupParticipants } from '@/services/expense';
 import groupService from '@/services/group';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Calendar, Check, ChevronDown, ChevronUp, ReceiptText, Undo2 } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
-import { Controller, set, useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import {
   FlatList,
   Image,
@@ -20,7 +21,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function CreateExpenseScreen() {
   const router = useRouter();
@@ -235,7 +235,11 @@ export default function CreateExpenseScreen() {
               />
               <Input
                 placeholder="Valor total"
-                onChangeText={(text) => setValue('value', text)}
+                keyboardType="decimal-pad"
+                onChangeText={(text) => {
+                  const filtered = text.replace(/,/g, '');
+                  setValue('value', filtered);
+                }}
                 {...register('value')}
               />
               <Controller
@@ -273,11 +277,7 @@ export default function CreateExpenseScreen() {
                           mode="date"
                           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                           onChange={handleChange}
-                          maximumDate={(() => {
-                            const today = new Date();
-                            today.setFullYear(today.getFullYear() - 18);
-                            return today;
-                          })()}
+                          minimumDate={new Date()}
                         />
                       )}
                     </View>
