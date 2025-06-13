@@ -219,91 +219,97 @@ export default function CreateExpenseScreen() {
       </View>
 
       {step == 1 && (
-        <View style={{ gap: 12 }}>
-          <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Insira os dados</Text>
-          <View>
-            <Input
-              placeholder="Nome da despesa"
-              onChangeText={(text) => setValue('name', text)}
-              {...register('name')}
-            />
-            <Input
-              placeholder="Descrição da despesa"
-              onChangeText={(text) => setValue('description', text)}
-              {...register('description')}
-            />
-            <Input
-              placeholder="Valor total"
-              onChangeText={(text) => setValue('value', text)}
-              {...register('value')}
-            />
-            <Controller
-              control={control}
-              name="dueDate"
-              render={({ field: { onChange, value } }) => {
-                const [show, setShow] = useState(false);
+        <View style={{ flex: 1 }}>
+          <View style={{ gap: 12, flexGrow: 1, flexShrink: 1 }}>
+            <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Insira os dados</Text>
+            <View>
+              <Input
+                placeholder="Nome da despesa"
+                onChangeText={(text) => setValue('name', text)}
+                {...register('name')}
+              />
+              <Input
+                placeholder="Descrição da despesa"
+                onChangeText={(text) => setValue('description', text)}
+                {...register('description')}
+              />
+              <Input
+                placeholder="Valor total"
+                onChangeText={(text) => setValue('value', text)}
+                {...register('value')}
+              />
+              <Controller
+                control={control}
+                name="dueDate"
+                render={({ field: { onChange, value } }) => {
+                  const [show, setShow] = useState(false);
 
-                const handleChange = (event: any, selectedDate?: Date) => {
-                  setShow(false);
-                  if (selectedDate) {
-                    onChange(selectedDate.toISOString());
-                  }
-                };
+                  const handleChange = (event: any, selectedDate?: Date) => {
+                    setShow(false);
+                    if (selectedDate) {
+                      onChange(selectedDate.toISOString());
+                    }
+                  };
 
-                return (
-                  <View style={styles.dateContainer}>
-                    <Pressable onPress={() => setShow(true)} style={styles.input}>
-                      <Text
-                        style={{
-                          color: value ? '#000' : Colors.lightGray,
-                          fontSize: 16,
-                          fontWeight: '500',
-                        }}
-                      >
-                        {value ? new Date(value).toLocaleDateString('pt-BR') : 'Data de Vencimento'}
-                      </Text>
-                    </Pressable>
+                  return (
+                    <View style={styles.dateContainer}>
+                      <Pressable onPress={() => setShow(true)} style={styles.input}>
+                        <Text
+                          style={{
+                            color: value ? '#000' : Colors.lightGray,
+                            fontSize: 16,
+                            fontWeight: '500',
+                          }}
+                        >
+                          {value
+                            ? new Date(value).toLocaleDateString('pt-BR')
+                            : 'Data de Vencimento'}
+                        </Text>
+                      </Pressable>
 
-                    {show && (
-                      <DateTimePicker
-                        value={value ? new Date(value) : new Date()}
-                        mode="date"
-                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                        onChange={handleChange}
-                        maximumDate={(() => {
-                          const today = new Date();
-                          today.setFullYear(today.getFullYear() - 18);
-                          return today;
-                        })()}
-                      />
-                    )}
-                  </View>
-                );
-              }}
+                      {show && (
+                        <DateTimePicker
+                          value={value ? new Date(value) : new Date()}
+                          mode="date"
+                          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                          onChange={handleChange}
+                          maximumDate={(() => {
+                            const today = new Date();
+                            today.setFullYear(today.getFullYear() - 18);
+                            return today;
+                          })()}
+                        />
+                      )}
+                    </View>
+                  );
+                }}
+              />
+            </View>
+
+            <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Participantes</Text>
+
+            <FlatList
+              data={participants}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderItem}
+              contentContainerStyle={{ gap: 12 }}
             />
           </View>
 
-          <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Participantes</Text>
+          <View style={{ gap: 16, paddingTop: 16 }}>
+            <View style={{ flexDirection: 'row', gap: 4, justifyContent: 'center' }}>
+              <Stepper active={true} />
+              <Stepper active={false} />
+            </View>
 
-          <FlatList
-            data={participants}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderItem}
-            contentContainerStyle={{ gap: 12 }}
-          />
-
-          <View style={{ flexDirection: 'row', gap: 4, justifyContent: 'center' }}>
-            <Stepper active={true} />
-            <Stepper active={false} />
+            <Button text="PROSSEGUIR" onPress={() => setStep(2)} />
           </View>
-
-          <Button text="PROSSEGUIR" onPress={() => setStep(2)} />
         </View>
       )}
 
       {step == 2 && (
         <View style={{ flex: 1 }}>
-          <View style={{ gap: 12, flex: 1 }}>
+          <View style={{ gap: 12, flexGrow: 1, flexShrink: 1 }}>
             <Text style={{ color: Colors.primary, fontWeight: 'bold' }}>Despesa</Text>
 
             <View style={{ flexDirection: 'row', gap: 12 }}>
@@ -379,7 +385,7 @@ export default function CreateExpenseScreen() {
             />
           </View>
 
-          <View style={{ gap: 16 }}>
+          <View style={{ gap: 16, paddingTop: 16 }}>
             <View style={{ flexDirection: 'row', gap: 4, justifyContent: 'center' }}>
               <Stepper active={false} />
               <Stepper active={true} />
