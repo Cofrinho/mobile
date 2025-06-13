@@ -39,7 +39,7 @@ interface Group {
   expenses: Array<{
     id: string;
     name: string;
-    total: number;
+    value: number;
     created_at: string;
     updated_at: string;
     group_id: number;
@@ -58,7 +58,7 @@ interface Group {
 interface Expense {
   id: string;
   name: string;
-  total: number;
+  value: number;
 }
 
 export default function GroupDetails() {
@@ -193,7 +193,7 @@ export default function GroupDetails() {
               {isGroupOwner ? (
                 <Button
                   text="Criar despesa"
-                  onPress={() => router.push('/(expense)/create-expense')}
+                  onPress={() => router.push(`/(expense)/create-expense?groupId=${id}`)}
                 />
               ) : (
                 <View style={styles.organizerBox}>
