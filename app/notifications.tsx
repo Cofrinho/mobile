@@ -1,62 +1,77 @@
 import CircleIconButton from '@/components/CircleIconButton';
 import NotificationCard from '@/components/NotificationCard';
 import Colors from '@/constants/colors';
+import { AuthContext } from '@/contexts/AuthContext';
+import notificationService from '@/services/notifications';
 import { useRouter } from 'expo-router';
-import { AlertTriangle, BanknoteArrowUp, PiggyBank, Undo2 } from 'lucide-react-native';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { Undo2 } from 'lucide-react-native';
+import { useContext, useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-const notificationsArray = [
-  {
-    id: 'cofrinho',
-    title: 'Recarga cofrinho',
-    value: 49,
-    description: 'Recarga recebida de Nubank',
-    date: '07 abr. • 15:30',
-    icon: <PiggyBank color={Colors.primary} />,
-  },
-  {
-    id: 'group',
-    title: 'Racha churras',
-    value: 75,
-    description: 'Contribua com o churras',
-    date: '07 abr. • 15:30',
-    icon: <BanknoteArrowUp color={Colors.primary} />,
-    group: '1',
-  },
-  {
-    id: 'due',
-    title: 'Lembrete',
-    value: 77,
-    description: 'Conta de luz vence amanhã',
-    date: '07 abr. • 15:30',
-    icon: <AlertTriangle color={Colors.primary} />,
-    group: '4',
-  },
-];
 
 interface notification {
   id: string;
+  type: string;
   title: string;
   value: number;
   description: string;
   date: string;
   icon: React.ReactNode;
   group?: string;
+  seen: boolean;
 }
 
-export default function Notifications() {
+interface NotificationsProps {
+  userId: number;
+}
+
+export default function Notifications({ userId }: NotificationsProps) {
   const router = useRouter();
+  const { user } = useContext(AuthContext);
+
+  const [notifications, setNotifications] = useState<notification[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    async function fetchNotifications() {
+      setLoading(true);
+      try {
+        const data = await notificationService.getNotifications(Number(user?.id));
+
+        setNotifications(data);
+      } catch (error) {
+        console.error('Error loading notifications', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchNotifications();
+  }, [user?.id]);
+
+  const handlePressNotification = async (item: notification) => {
+    if (!item.seen) {
+      try {
+        await notificationService.markAsSeen(Number(item.id));
+        setNotifications((prev) => prev.map((n) => (n.id === item.id ? { ...n, seen: true } : n)));
+      } catch (error) {
+        console.error('Erro ao marcar notificação como vista', error);
+      }
+    }
+  };
 
   const renderItem = ({ item }: { item: notification }) => (
     <NotificationCard
       id={item.id}
+      type={item.type}
       title={item.title}
       value={item.value}
       icon={item.icon}
       description={item.description}
       date={item.date}
       group={item.group}
+      seen={item.seen}
+      onPress={() => handlePressNotification(item)}
     />
   );
 
@@ -72,13 +87,21 @@ export default function Notifications() {
           <Text style={styles.title}>Notificações</Text>
         </View>
 
-        <FlatList
-          data={notificationsArray}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={{ gap: 12, paddingBottom: 16 }}
-          showsVerticalScrollIndicator={false}
-        />
+        {loading ? (
+          <ActivityIndicator size="large" color={Colors.primary} />
+        ) : notifications.length === 0 ? (
+          <Text style={{ textAlign: 'center', marginTop: 32, color: Colors.lightGray }}>
+            Nenhuma notificação encontrada.
+          </Text>
+        ) : (
+          <FlatList
+            data={notifications}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={{ gap: 12, paddingBottom: 16 }}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
       </View>
     </SafeAreaView>
   );
