@@ -2,15 +2,10 @@ import Button from '@/components/Button';
 import MoneyText from '@/components/MoneyText';
 import Colors from '@/constants/colors';
 import { Expense, ExpenseService } from '@/services/expense';
-import {
-  useFocusEffect,
-  useGlobalSearchParams,
-  useLocalSearchParams,
-  useRouter,
-} from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Calendar, ReceiptText, Undo2 } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ExpenseDetail() {
   const router = useRouter();
@@ -20,6 +15,8 @@ export default function ExpenseDetail() {
   const { id, groupId } = useLocalSearchParams();
 
   const [expense, setExpense] = useState<Expense>();
+  const [expenseMembers, setExpenseMembers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -29,6 +26,63 @@ export default function ExpenseDetail() {
       }
       fetchExpenseDetails();
     }, []),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (activeTab !== 2) return;
+      async function fetchExpenseMembers() {
+        try {
+          setLoading(true);
+          const data = await ExpenseService.getExpenseMembers(Number(groupId), id.toString());
+          setExpenseMembers(data);
+        } catch (error) {
+          console.error('Erro ao buscar membros da despesa:', error);
+        } finally {
+          setLoading(false);
+        }
+      }
+      fetchExpenseMembers();
+    }, [activeTab]),
+  );
+
+  const renderItem = ({ item }: { item: any }) => (
+    <View style={styles.memberCard}>
+      <Image
+        source={{
+          uri: item?.User?.avatar_url ? item?.User?.avatar_url : 'https://i.sstatic.net/l60Hf.png',
+        }}
+        style={styles.memberCardAvatar}
+      />
+      <View>
+        <Text style={styles.memberCardTitle}>{item?.User?.name}</Text>
+        <Text style={styles.memberCardSubTitle}>
+          Total R$: <MoneyText amount={item?.amount} size={12} /> • {item?.percentage_paid}%
+        </Text>
+      </View>
+      <View style={{ marginLeft: 'auto' }}>
+        <View
+          style={{
+            backgroundColor: item?.status === 'PENDING' ? Colors.secondary : Colors.green,
+            borderRadius: 100,
+            paddingHorizontal: 8,
+            paddingVertical: 2,
+            borderWidth: 1,
+            borderColor: item?.status === 'PENDING' ? Colors.primary : Colors.green,
+          }}
+        >
+          <Text
+            style={{
+              color: item?.status === 'PENDING' ? Colors.primary : Colors.green,
+              fontWeight: 'semibold',
+              fontSize: 9,
+            }}
+          >
+            {item?.status === 'PENDING' ? 'PENDENTE' : 'PAGO'}
+          </Text>
+        </View>
+      </View>
+    </View>
   );
 
   return (
@@ -234,9 +288,51 @@ export default function ExpenseDetail() {
 
       {activeTab == 2 && (
         <View>
-          <Text>oi</Text>
+          <FlatList
+            data={expenseMembers}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            ListEmptyComponent={
+              !loading
+                ? () => (
+                    <Text style={{ textAlign: 'center', marginTop: 20 }}>
+                      Nenhum membro encontrado
+                    </Text>
+                  )
+                : null
+            }
+          />
         </View>
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  memberCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderWidth: 1,
+    borderColor: '#DCDCDC',
+    borderRadius: 8,
+    padding: 8,
+    paddingHorizontal: 12,
+    marginBottom: 8,
+  },
+  memberCardAvatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+  },
+  memberCardTitle: {
+    color: Colors.lightGray,
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  memberCardSubTitle: {
+    fontSize: 12,
+    color: Colors.primary,
+    fontWeight: '600',
+  },
+});
