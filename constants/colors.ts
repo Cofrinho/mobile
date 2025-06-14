@@ -6,6 +6,7 @@ const Colors = {
   lightGray3: '#EEEEEE',
   black: '#0B0B0B',
   green: '#73B57F',
+  greenSoft: '#55B46740',
   red: '#D55757',
 };
 

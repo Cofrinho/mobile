@@ -2,15 +2,10 @@ import Button from '@/components/Button';
 import MoneyText from '@/components/MoneyText';
 import Colors from '@/constants/colors';
 import { Expense, ExpenseService } from '@/services/expense';
-import {
-  useFocusEffect,
-  useGlobalSearchParams,
-  useLocalSearchParams,
-  useRouter,
-} from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Calendar, ReceiptText, Undo2 } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ExpenseDetail() {
   const router = useRouter();
@@ -25,6 +20,7 @@ export default function ExpenseDetail() {
     useCallback(() => {
       async function fetchExpenseDetails() {
         const data = await ExpenseService.getExpenseDetails(Number(groupId), id.toString());
+
         setExpense(data);
       }
       fetchExpenseDetails();
@@ -123,7 +119,7 @@ export default function ExpenseDetail() {
                     }}
                   >
                     <Text style={{ color: Colors.primary, fontWeight: '500', fontSize: 12 }}>
-                      {expense?.status}
+                      {expense?.status === 'PAID' ? 'Pago' : 'Pendente'}
                     </Text>
                   </View>
                 </View>
@@ -162,12 +158,8 @@ export default function ExpenseDetail() {
                         width: `${(Number(expense?.balance) / Number(expense?.value)) * 100}%`,
                         backgroundColor: Colors.primary,
                         height: 20,
-                        borderTopStartRadius: 100,
-                        borderEndStartRadius: 100,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'flex-end',
-                        paddingEnd: 4,
+                        borderTopLeftRadius: 100,
+                        borderBottomLeftRadius: 100,
                       }}
                     ></View>
                   )}
@@ -222,7 +214,7 @@ export default function ExpenseDetail() {
                   Vencimento
                 </Text>
                 <Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 12 }}>
-                  {expense?.dueDate}
+                  {expense?.dueDate ? expense.dueDate.split('-').reverse().join('-') : ''}
                 </Text>
               </View>
             </View>
@@ -232,9 +224,69 @@ export default function ExpenseDetail() {
         </View>
       )}
 
-      {activeTab == 2 && (
-        <View>
-          <Text>oi</Text>
+      {activeTab === 2 && (
+        <View style={{ gap: 4, paddingBottom: 24 }}>
+          <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 4 }}>Participantes</Text>
+
+          {expense?.members && expense.members.length > 0 ? (
+            expense.members.map((member, index) => (
+              <View
+                key={index}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 12,
+                  borderWidth: 1,
+                  borderColor: Colors.lightGray2,
+                  borderRadius: 8,
+                  padding: 12,
+                  paddingHorizontal: 12,
+                  marginBottom: 8,
+                }}
+              >
+                <Image
+                  source={{ uri: member.User.avatar_url ?? 'https://i.sstatic.net/l60Hf.png' }}
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: 21,
+                  }}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: Colors.lightGray, fontWeight: 'bold', fontSize: 16 }}>
+                    {member.User.name}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: Colors.primary, fontWeight: '600' }}>
+                    {Number(member.amount).toLocaleString('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
+                    })}{' '}
+                    • {Number(member.percentage_paid).toFixed(2)}%
+                  </Text>
+                </View>
+                <Text
+                  style={{
+                    position: 'absolute',
+                    right: 10,
+                    borderWidth: 1,
+                    borderColor: member.status === 'PAID' ? Colors.green : Colors.primary,
+                    backgroundColor: member.status === 'PAID' ? Colors.greenSoft : Colors.secondary,
+                    color: member.status === 'PAID' ? Colors.green : Colors.primary,
+                    borderRadius: 100,
+                    paddingHorizontal: 12,
+                    paddingVertical: 2,
+                    fontSize: 12,
+                  }}
+                >
+                  {member.status === 'PAID' ? 'Pago' : 'Pendente'}
+                </Text>
+              </View>
+            ))
+          ) : (
+            <Text style={{ textAlign: 'center', color: Colors.lightGray }}>
+              Nenhum participante encontrado.
+            </Text>
+          )}
         </View>
       )}
     </View>
