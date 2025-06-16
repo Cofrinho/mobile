@@ -342,8 +342,67 @@ export default function ExpenseDetail() {
       )}
 
       {activeTab == 2 && (
-        <View>
-          <Text>oi</Text>
+        <View style={{ gap: 4, paddingBottom: 24 }}>
+          <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 4 }}>Participantes</Text>
+          {expense?.members && expense.members.length > 0 ? (
+            expense.members.map((member, index) => (
+              <View
+                key={index}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 12,
+                  borderWidth: 1,
+                  borderColor: Colors.lightGray2,
+                  borderRadius: 8,
+                  padding: 12,
+                  paddingHorizontal: 12,
+                  marginBottom: 8,
+                }}
+              >
+                <Image
+                  source={{ uri: member.User.avatar_url ?? 'https://i.sstatic.net/l60Hf.png' }}
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: 21,
+                  }}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: Colors.lightGray, fontWeight: 'bold', fontSize: 16 }}>
+                    {member.User.name}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: Colors.primary, fontWeight: '600' }}>
+                    {Number(member.amount).toLocaleString('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
+                    })}
+                    • {Number(member.percentage_paid).toFixed(2)}%
+                  </Text>
+                </View>
+                <Text
+                  style={{
+                    position: 'absolute',
+                    right: 10,
+                    borderWidth: 1,
+                    borderColor: member.status === 'PAID' ? Colors.green : Colors.primary,
+                    backgroundColor: member.status === 'PAID' ? Colors.greenSoft : Colors.secondary,
+                    color: member.status === 'PAID' ? Colors.green : Colors.primary,
+                    borderRadius: 100,
+                    paddingHorizontal: 12,
+                    paddingVertical: 2,
+                    fontSize: 12,
+                  }}
+                >
+                  {member.status === 'PAID' ? 'Pago' : 'Pendente'}
+                </Text>
+              </View>
+            ))
+          ) : (
+            <Text style={{ textAlign: 'center', color: Colors.lightGray }}>
+              Nenhum participante encontrado.
+            </Text>
+          )}
         </View>
       )}
     </View>
