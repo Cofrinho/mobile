@@ -113,3 +113,21 @@ npx expo start
 O Cofrinho foi desenvolvido como projeto final do estágio na Compass UOL, com o objetivo de aplicar conceitos de clean architecture, segurança e integração via Open Finance. O Cofrinho é uma plataforma pensada para facilitar o controle de despesas compartilhadas entre grupos, permitindo a conexão com múltiplas instituições financeiras por meio do ecossistema aberto do Open Finance.
 
 O projeto demonstra na prática como é possível unir organização financeira colaborativa com tecnologias modernas de integração bancária, oferecendo uma base sólida para soluções financeiras inovadoras.
+
+## 👥 Contribuidores
+
+Agradecimentos especiais a todos que contribuíram com o desenvolvimento deste projeto:
+
+| [<img src="https://avatars.githubusercontent.com/u/107586000?v=4" width="100px"><br><sub>@AlexandreTonin</sub>](https://github.com/AlexandreTonin) | [<img src="https://avatars.githubusercontent.com/u/131720836?v=4" width="100px"><br><sub>@AndreiAlbrecht1</sub>](https://github.com/AndreiAlbrecht1) | [<img src="https://avatars.githubusercontent.com/u/106553412?s=400&u=18e5c6d4e1f21691690c40386d9337a10cd187b4&v=4" width="100px"><br><sub>@matheusaguiarrr</sub>](https://github.com/matheusaguiarrr) |
+| :---: | :---: | :---: |
+
+
+
+> ✨ Sinta-se livre para contribuir também! Basta abrir uma issue ou enviar um pull request. 😊
+
+---
+
+## 📄 Licença
+
+Este projeto está licenciado sob a [MIT License](LICENSE).
+
