@@ -11,7 +11,7 @@ import { useCallback, useContext, useState } from 'react';
 import { FlatList, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-interface Group {
+export interface Group {
   id: number;
   name: string;
   description: string;

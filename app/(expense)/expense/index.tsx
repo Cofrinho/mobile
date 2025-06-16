@@ -1,8 +1,10 @@
+import { Group } from '@/app/group';
 import Button from '@/components/Button';
 import MoneyText from '@/components/MoneyText';
 import Colors from '@/constants/colors';
 import { AuthContext } from '@/contexts/AuthContext';
 import { Expense, ExpenseService } from '@/services/expense';
+import groupService from '@/services/group';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Calendar, ReceiptText, Undo2 } from 'lucide-react-native';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -16,6 +18,8 @@ export default function ExpenseDetail() {
 
   const { id, groupId } = useLocalSearchParams();
 
+  const [group, setGroup] = useState<Group | null>(null);
+  const isGroupOwner = group?.group_owner === user?.id;
   const [expense, setExpense] = useState<Expense>();
   const [expenseMembers, setExpenseMembers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -29,13 +33,18 @@ export default function ExpenseDetail() {
         const data = await ExpenseService.getExpenseDetails(Number(groupId), id.toString());
 
         setExpense(data);
-        data.members.map((member: any) => {
-          if (member.user_id === user?.id) {
-            setAlreadyPaid(true);
-          }
-        });
+
+        const userPaid =
+          data.members.filter((member) => member.User.id == user?.id)[0].status == 'PAID';
+        setAlreadyPaid(userPaid || false);
       }
       fetchExpenseDetails();
+
+      async function fetchGroups() {
+        const response = await groupService.getById(groupId.toString());
+        setGroup(response);
+      }
+      fetchGroups();
     }, []),
   );
 
@@ -332,12 +341,31 @@ export default function ExpenseDetail() {
                 {successMessage}
               </Text>
             ) : null}
+
             <Button
-              text={loadingPayment ? 'PAGANDO...' : 'PAGAR DESPESA'}
-              disabled={alreadyPaid || loadingPayment}
+              text={loadingPayment ? 'PAGANDO...' : 'CONTRIBUIR COM A DESPESA'}
+              disabled={
+                alreadyPaid ||
+                loadingPayment ||
+                (Number(expense?.balance) / Number(expense?.value)) * 100 == 100
+              }
               onPress={handlePaymentExpense}
             />
           </View>
+
+          {isGroupOwner && (
+            <View>
+              <Button
+                text={loadingPayment ? 'PAGANDO...' : 'PAGAMENTO DA DESPESA'}
+                disabled={
+                  alreadyPaid ||
+                  loadingPayment ||
+                  !((Number(expense?.balance) / Number(expense?.value)) * 100 == 100)
+                }
+                onPress={() => router.push(`/(expense)/expense-payment?id=${id}`)}
+              />
+            </View>
+          )}
         </View>
       )}
 
