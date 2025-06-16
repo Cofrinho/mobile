@@ -289,7 +289,7 @@ export default function ExpenseDetail() {
 
                   <View style={{ flex: 1, alignItems: 'center' }}>
                     <Text style={{ fontWeight: 'bold' }}>
-                      {(Number(expense?.balance) / Number(expense?.value)) * 100}%
+                      {((Number(expense?.balance) / Number(expense?.value)) * 100).toFixed(0)}%
                     </Text>
                   </View>
 
