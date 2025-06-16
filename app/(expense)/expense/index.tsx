@@ -6,7 +6,7 @@ import { Expense, ExpenseService } from '@/services/expense';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Calendar, ReceiptText, Undo2 } from 'lucide-react-native';
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ExpenseDetail() {
   const { user } = useContext(AuthContext);
@@ -27,6 +27,7 @@ export default function ExpenseDetail() {
     useCallback(() => {
       async function fetchExpenseDetails() {
         const data = await ExpenseService.getExpenseDetails(Number(groupId), id.toString());
+
         setExpense(data);
         data.members.map((member: any) => {
           if (member.user_id === user?.id) {
@@ -222,7 +223,7 @@ export default function ExpenseDetail() {
                     }}
                   >
                     <Text style={{ color: Colors.primary, fontWeight: '500', fontSize: 12 }}>
-                      {expense?.status}
+                      {expense?.status === 'PAID' ? 'Pago' : 'Pendente'}
                     </Text>
                   </View>
                 </View>
@@ -261,7 +262,8 @@ export default function ExpenseDetail() {
                         width: `${(Number(expense?.balance) / Number(expense?.value)) * 100}%`,
                         backgroundColor: Colors.primary,
                         height: 20,
-                        borderRadius: 100,
+                        borderTopStartRadius: 100,
+                        borderEndStartRadius: 100,
                         flexDirection: 'row',
                         alignItems: 'center',
                         justifyContent: 'flex-end',
@@ -320,7 +322,7 @@ export default function ExpenseDetail() {
                   Vencimento
                 </Text>
                 <Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 12 }}>
-                  {expense?.dueDate}
+                  {expense?.dueDate ? expense.dueDate.split('-').reverse().join('-') : ''}
                 </Text>
               </View>
             </View>
@@ -341,20 +343,7 @@ export default function ExpenseDetail() {
 
       {activeTab == 2 && (
         <View>
-          <FlatList
-            data={expenseMembers}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            ListEmptyComponent={
-              !loading
-                ? () => (
-                    <Text style={{ textAlign: 'center', marginTop: 20 }}>
-                      Nenhum membro encontrado
-                    </Text>
-                  )
-                : null
-            }
-          />
+          <Text>oi</Text>
         </View>
       )}
     </View>

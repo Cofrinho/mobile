@@ -1,4 +1,3 @@
-import AnimatedView from '@/components/AnimatedView';
 import CircleIconButton from '@/components/CircleIconButton';
 import MoneyText from '@/components/MoneyText';
 import NotificationButton from '@/components/NotificationButton';
@@ -10,18 +9,17 @@ import accountService from '@/services/account';
 import openFinanceService from '@/services/open-finance';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ChevronRight, Eye, EyeClosed, Plus } from 'lucide-react-native';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import {
   Animated,
-  FlatList,
   Image,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { RefreshControl } from 'react-native';
 
 interface IAccountData {
   balance: number;
@@ -32,6 +30,15 @@ interface IAccountData {
 interface IOpenFinanceData {
   balance: number;
   logos: [];
+}
+
+interface ITransaction {
+  id: string;
+  type: string;
+  title: string;
+  value: number;
+  date?: string;
+  group?: string;
 }
 
 export default function Page() {
@@ -48,12 +55,14 @@ export default function Page() {
   const [hasOpenFinanceConsent, setHasOpenFinanceConsent] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
+  const [transactions, setTransactions] = useState<ITransaction[]>([]);
 
   const onRefresh = async () => {
     setRefreshing(true);
     try {
       const accountData = await accountService.mountAccountScreen();
       setAccountData(accountData);
+      setTransactions(accountData.transactions?.slice(0, 3) || []);
 
       const openFinanceData = await openFinanceService.getBalanceAndLogos();
       setHasOpenFinanceConsent(true);
@@ -72,6 +81,7 @@ export default function Page() {
         try {
           const accountData = await accountService.mountAccountScreen();
           setAccountData(accountData);
+          setTransactions(accountData.transactions?.slice(0, 3) || []);
 
           const openFinanceData = await openFinanceService.getBalanceAndLogos();
           setHasOpenFinanceConsent(true);
@@ -248,9 +258,18 @@ export default function Page() {
 
           <ScrollView>
             <View style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <TransactionCard operation="in" value={40} title="Recarga Cofrinho" />
-              <TransactionCard operation="out" value={40} title="Recarga Cofrinho" />
-              <TransactionCard operation="in" value={40} title="Recarga Cofrinho" />
+              {transactions.length === 0 ? (
+                <Text style={{ color: Colors.lightGray }}>Nenhuma transação encontrada.</Text>
+              ) : (
+                transactions.map((transaction) => (
+                  <TransactionCard
+                    key={transaction.id}
+                    type={transaction.type}
+                    value={transaction.value}
+                    title={transaction.title}
+                  />
+                ))
+              )}
             </View>
           </ScrollView>
         </View>

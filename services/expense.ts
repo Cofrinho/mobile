@@ -13,17 +13,16 @@ export interface Expense {
   dueDate: string;
   createdAt: string;
   updatedAt: string;
-  members: [
-    {
+  members: Array<{
+    percentage_paid: string;
+    amount: string;
+    status: 'PAID' | 'PENDING';
+    User: {
       id: number;
-      user_id: number;
-      expense_id: number;
-      amount: number;
-      description: string;
-      createdAt: string;
-      updatedAt: string;
-    },
-  ];
+      name: string;
+      avatar_url: string | null;
+    };
+  }>;
 }
 
 export interface GroupParticipants {
@@ -58,6 +57,7 @@ export const ExpenseService = {
   },
   getExpenseDetails: async (groupId: number, expenseId: string): Promise<Expense> => {
     const { data } = await api.get(`/groups/${groupId}/expenses/${expenseId}`);
+
     return data;
   },
   getExpenseMembers: async (groupId: number, expenseId: string) => {

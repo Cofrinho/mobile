@@ -18,7 +18,10 @@ export default function Successfull() {
         <CheckCircle2 color={Colors.primary} size={64} />
       </View>
 
-      <RoundedButton onPress={() => router.push('/')} text="VOLTAR PARA A CONTA"></RoundedButton>
+      <RoundedButton
+        onPress={() => router.push('/(tabs)/account')}
+        text="VOLTAR PARA A CONTA"
+      ></RoundedButton>
     </View>
   );
 }

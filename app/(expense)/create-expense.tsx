@@ -365,7 +365,7 @@ export default function CreateExpenseScreen() {
                   Vencimento
                 </Text>
                 <Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 12 }}>
-                  {new Date(dueDate).toLocaleString().split(',')[0]}
+                  {new Date(dueDate).toLocaleDateString('pt-BR')}
                 </Text>
               </View>
             </View>

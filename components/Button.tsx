@@ -56,6 +56,7 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: 4,
     flexDirection: 'row',
+    marginBottom: 10,
   },
   text: {
     color: Colors.secondary,
