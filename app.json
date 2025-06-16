@@ -3,7 +3,7 @@
     "name": "cofrinho",
     "slug": "cofrinho",
     "extra": {
-      "apiUrl": "http://192.168.8.2:3000"
+      "apiUrl": "http://localhost:3000"
     },
     "version": "1.0.0",
     "orientation": "portrait",
