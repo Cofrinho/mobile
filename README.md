@@ -1,50 +1,123 @@
-# Welcome to your Expo app 👋
+# 🐷 Cofrinho APP / FRONTEND
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicativo móvel do **Cofrinho**, plataforma para organização e controle de despesas compartilhadas entre grupos, com integração ao ecossistema bancário via **Open Finance** (Simulado).
 
-## Get started
+> 🔗 O backend do APP está disponível em: [github.com/Cofrinho/backend](https://github.com/Cofrinho/backend)
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## 🚀 Funcionalidades
 
-2. Start the app
+- 👤 Cadastro, login e edição de perfil de usuários
+- 🔐 Autenticação segura integrada com JWT do backend
+- 💳 Visualização e gerenciamento de contas vinculadas via Open Finance
+- 👥 Criação e gerenciamento de grupos e membros
+- 💰 Controle e divisão de despesas compartilhadas
+- 📲 Notificações internas e status das transações
+- 📱 Interface responsiva com navegação intuitiva via Expo Router
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🔧 Requisitos
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- **Node.js** – versão recomendada para desenvolvimento
+- **Git** – para clonar o repositório  
+  Baixe em: https://git-scm.com/
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## 🛠️ Tecnologias
 
-When you're ready, run:
+### **Mobile / Front-end**
+- [React Native](https://reactnative.dev/)
+- [Expo](https://expo.dev/)
+- [Expo Router](https://expo.github.io/router/)
+- [React Navigation](https://reactnavigation.org/)
+- [Axios](https://axios-http.com/)
+- [React Hook Form](https://react-hook-form.com/)
+- [Zod](https://zod.dev/) para validação de formulários
+- [Lottie React Native](https://github.com/lottie-react-native/lottie-react-native) para animações
+- [AsyncStorage](https://react-native-async-storage.github.io/async-storage/) e [SecureStore](https://docs.expo.dev/versions/latest/sdk/securestore/) para armazenamento local seguro
 
-```bash
-npm run reset-project
+### **Dev Tools**
+- ESLint e Prettier para padronização de código
+- TypeScript para tipagem estática
+- Expo CLI para desenvolvimento e build
+
+---
+
+## 📁 Estrutura de Pastas (principal)
+
+```
+.
+├── app/             
+│   ├── auth/             
+│   │   └── forgot-password/  # Recuperação de senha
+│   │   └── register/         # Cadastro de usuários
+│   ├── bank-app/        
+│   │   └── open-finance/  # Telas de Open Finance
+│   │   └── payment/       # Processamento de pagamentos
+│   ├── expense/           
+│   │   └── create/        # Criação de despesas
+│   │   └── view/          # Visualização de despesas
+│   ├── open-finance/     
+│   │   └── link-account/  # Vinculação de contas
+│   │   └── link-status/   # Status de vinculação
+│   ├── tabs/             
+│   │   └── account/       # Perfil do usuário
+│   │   └── add-funds/     # Adição de saldo
+│   │   └── groups/        # Listagem de grupos
+│   ├── groups/            
+│   │   └── edit/          # Edição de grupos
+│   │   └── members/       # Membros do grupo
+│   ├── notifications/     # Centro de notificações
+│   ├── transactions/      # Histórico de transações
+│   └── user/              # Gerenciamento do usuário
+├── assets/               
+│   └── animations/        # Animações Lottie
+│   └── fonts/             # Fontes customizadas
+│   └── images/            # Imagens e ícones
+├── components/           
+├── constants/            
+├── contexts/              
+├── services/             
+├── utils/                 # Utilitários
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## ⚙️ Como Executar o Projeto
 
-To learn more about developing your project with Expo, look at the following resources:
+1. **Clonar o repositório e acessar a pasta:**
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+git clone https://github.com/Cofrinho/mobile.git
+cd mobile
+```
 
-## Join the community
+2. **Instalar dependências:**
 
-Join our community of developers creating universal apps.
+```bash
+npm install
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+3. **Iniciar o servidor Expo:**
+
+```bash
+npx expo start
+```
+
+4. **Abrir o app:**
+
+- No emulador Android ou iOS (via comandos `npm run android` ou `npm run ios`)
+- No dispositivo físico, escaneando o QR code exibido no terminal ou navegador, usando o app Expo Go
+
+---
+
+## 📌 Sobre o Projeto
+
+O **Cofrinho** é um aplicativo móvel que complementa o backend da plataforma para controle de despesas compartilhadas, com foco em usabilidade, segurança e integração via Open Finance.  
+
+Construído com tecnologias modernas como React Native e Expo, o app oferece uma experiência fluida para gerenciar grupos, contas, despesas e transações financeiras de forma colaborativa e transparente.
+
+Este projeto faz parte do desenvolvimento final da plataforma Cofrinho, demonstrando como conectar o front-end mobile com serviços financeiros modernos em um ambiente seguro e escalável.
