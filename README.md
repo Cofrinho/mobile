@@ -1,6 +1,6 @@
 # 🐷 Cofrinho APP / FRONTEND
 
-Aplicativo móvel do **Cofrinho**, plataforma para organização e controle de despesas compartilhadas entre grupos, com integração ao ecossistema bancário via **Open Finance** (Simulado).
+APP do **Cofrinho**, plataforma para organização e controle de despesas compartilhadas entre grupos, com integração ao ecossistema **Open Finance** (Simulado).
 
 > 🔗 O backend do APP está disponível em: [github.com/Cofrinho/backend](https://github.com/Cofrinho/backend)
 
@@ -20,9 +20,8 @@ Aplicativo móvel do **Cofrinho**, plataforma para organização e controle de d
 
 ## 🔧 Requisitos
 
-- **Node.js** – versão recomendada para desenvolvimento
+- **Node.js** – versão recomendada LTS
 - **Git** – para clonar o repositório  
-  Baixe em: https://git-scm.com/
 
 ---
 
@@ -35,9 +34,10 @@ Aplicativo móvel do **Cofrinho**, plataforma para organização e controle de d
 - [React Navigation](https://reactnavigation.org/)
 - [Axios](https://axios-http.com/)
 - [React Hook Form](https://react-hook-form.com/)
-- [Zod](https://zod.dev/) para validação de formulários
-- [Lottie React Native](https://github.com/lottie-react-native/lottie-react-native) para animações
-- [AsyncStorage](https://react-native-async-storage.github.io/async-storage/) e [SecureStore](https://docs.expo.dev/versions/latest/sdk/securestore/) para armazenamento local seguro
+- [Zod](https://zod.dev/)
+- [Lottie React Native](https://github.com/lottie-react-native/lottie-react-native)
+- [AsyncStorage](https://react-native-async-storage.github.io/async-storage/) e [SecureStore](https://docs.expo.dev/versions/latest/sdk/securestore/)
+- [Lucide React Native](https://www.npmjs.com/package/lucide-react-native)
 
 ### **Dev Tools**
 - ESLint e Prettier para padronização de código
@@ -52,36 +52,30 @@ Aplicativo móvel do **Cofrinho**, plataforma para organização e controle de d
 .
 ├── app/             
 │   ├── auth/             
-│   │   └── forgot-password/  # Recuperação de senha
-│   │   └── register/         # Cadastro de usuários
+│   │   └── forgot-password/
+│   │   └── register/
 │   ├── bank-app/        
-│   │   └── open-finance/  # Telas de Open Finance
-│   │   └── payment/       # Processamento de pagamentos
-│   ├── expense/           
-│   │   └── create/        # Criação de despesas
-│   │   └── view/          # Visualização de despesas
+│   │   └── open-finance/
+│   │   └── payment/
+│   ├── expense/
 │   ├── open-finance/     
-│   │   └── link-account/  # Vinculação de contas
-│   │   └── link-status/   # Status de vinculação
+│   │   └── link-expiration/
+│   │   └── link-successfull/
+│   │   └── select-payment-account/
 │   ├── tabs/             
-│   │   └── account/       # Perfil do usuário
-│   │   └── add-funds/     # Adição de saldo
-│   │   └── groups/        # Listagem de grupos
-│   ├── groups/            
-│   │   └── edit/          # Edição de grupos
-│   │   └── members/       # Membros do grupo
-│   ├── notifications/     # Centro de notificações
-│   ├── transactions/      # Histórico de transações
-│   └── user/              # Gerenciamento do usuário
+│   │   └── account/
+│   │   └── add-funds/
+│   │   └── groups/
+│   └── user/
 ├── assets/               
-│   └── animations/        # Animações Lottie
-│   └── fonts/             # Fontes customizadas
-│   └── images/            # Imagens e ícones
+│   └── animations/
+│   └── fonts/
+│   └── images/
 ├── components/           
 ├── constants/            
 ├── contexts/              
 ├── services/             
-├── utils/                 # Utilitários
+├── utils/
 ```
 
 ---
@@ -116,8 +110,6 @@ npx expo start
 
 ## 📌 Sobre o Projeto
 
-O **Cofrinho** é um aplicativo móvel que complementa o backend da plataforma para controle de despesas compartilhadas, com foco em usabilidade, segurança e integração via Open Finance.  
+O Cofrinho foi desenvolvido como projeto final do estágio na Compass UOL, com o objetivo de aplicar conceitos de clean architecture, segurança e integração via Open Finance. O Cofrinho é uma plataforma pensada para facilitar o controle de despesas compartilhadas entre grupos, permitindo a conexão com múltiplas instituições financeiras por meio do ecossistema aberto do Open Finance.
 
-Construído com tecnologias modernas como React Native e Expo, o app oferece uma experiência fluida para gerenciar grupos, contas, despesas e transações financeiras de forma colaborativa e transparente.
-
-Este projeto faz parte do desenvolvimento final da plataforma Cofrinho, demonstrando como conectar o front-end mobile com serviços financeiros modernos em um ambiente seguro e escalável.
+O projeto demonstra na prática como é possível unir organização financeira colaborativa com tecnologias modernas de integração bancária, oferecendo uma base sólida para soluções financeiras inovadoras.
