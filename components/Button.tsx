@@ -29,6 +29,7 @@ export default function Button({
         styles.button,
         color ? { backgroundColor: color } : { backgroundColor: Colors.primary },
         center ? { justifyContent: 'center' } : { justifyContent: 'flex-start' },
+        disabled ? { opacity: 0.4 } : null,
       ]}
       onPress={onPress}
       disabled={disabled}
