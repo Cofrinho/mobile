@@ -1,13 +1,15 @@
 import Button from '@/components/Button';
 import MoneyText from '@/components/MoneyText';
 import Colors from '@/constants/colors';
+import { AuthContext } from '@/contexts/AuthContext';
 import { Expense, ExpenseService } from '@/services/expense';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Calendar, ReceiptText, Undo2 } from 'lucide-react-native';
-import { useCallback, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ExpenseDetail() {
+  const { user } = useContext(AuthContext);
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState(1);
@@ -17,12 +19,20 @@ export default function ExpenseDetail() {
   const [expense, setExpense] = useState<Expense>();
   const [expenseMembers, setExpenseMembers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingPayment, setLoadingPayment] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [alreadyPaid, setAlreadyPaid] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       async function fetchExpenseDetails() {
         const data = await ExpenseService.getExpenseDetails(Number(groupId), id.toString());
         setExpense(data);
+        data.members.map((member: any) => {
+          if (member.user_id === user?.id) {
+            setAlreadyPaid(true);
+          }
+        });
       }
       fetchExpenseDetails();
     }, []),
@@ -45,6 +55,15 @@ export default function ExpenseDetail() {
       fetchExpenseMembers();
     }, [activeTab]),
   );
+
+  useEffect(() => {
+    if (activeTab === 2) {
+      const timer = setTimeout(() => {
+        setSuccessMessage('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage, activeTab]);
 
   const renderItem = ({ item }: { item: any }) => (
     <View style={styles.memberCard}>
@@ -84,6 +103,32 @@ export default function ExpenseDetail() {
       </View>
     </View>
   );
+
+  const handlePaymentExpense = async () => {
+    if (!expense) return;
+    try {
+      setLoadingPayment(true);
+      await ExpenseService.createMemberExpenseTransaction(Number(id));
+      setSuccessMessage('Pagamento realizado com sucesso!');
+      const data = await ExpenseService.getExpenseDetails(Number(groupId), id.toString());
+      setExpense(data);
+      data.members.map((member: any) => {
+        if (member.user_id === user?.id) {
+          setAlreadyPaid(true);
+        }
+      });
+    } catch (error: any) {
+      if (error.response?.status === 400) {
+        if (error.response.data.error === 'Insufficient account balance to complete the payment.') {
+          alert('Você não possui saldo suficiente para pagar esta despesa.');
+        }
+      }
+      console.log(error.response.data.error);
+      console.error('Erro ao pagar despesa:', error);
+    } finally {
+      setLoadingPayment(false);
+    }
+  };
 
   return (
     <View
@@ -216,8 +261,7 @@ export default function ExpenseDetail() {
                         width: `${(Number(expense?.balance) / Number(expense?.value)) * 100}%`,
                         backgroundColor: Colors.primary,
                         height: 20,
-                        borderTopStartRadius: 100,
-                        borderEndStartRadius: 100,
+                        borderRadius: 100,
                         flexDirection: 'row',
                         alignItems: 'center',
                         justifyContent: 'flex-end',
@@ -281,7 +325,16 @@ export default function ExpenseDetail() {
               </View>
             </View>
 
-            <Button text="PAGAR DESPESA" />
+            {successMessage ? (
+              <Text style={{ color: Colors.green, textAlign: 'center', fontWeight: 'bold' }}>
+                {successMessage}
+              </Text>
+            ) : null}
+            <Button
+              text={loadingPayment ? 'PAGANDO...' : 'PAGAR DESPESA'}
+              disabled={alreadyPaid || loadingPayment}
+              onPress={handlePaymentExpense}
+            />
           </View>
         </View>
       )}

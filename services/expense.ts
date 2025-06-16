@@ -13,6 +13,17 @@ export interface Expense {
   dueDate: string;
   createdAt: string;
   updatedAt: string;
+  members: [
+    {
+      id: number;
+      user_id: number;
+      expense_id: number;
+      amount: number;
+      description: string;
+      createdAt: string;
+      updatedAt: string;
+    },
+  ];
 }
 
 export interface GroupParticipants {
@@ -53,8 +64,8 @@ export const ExpenseService = {
     const { data } = await api.get(`/groups/${groupId}/expenses/${expenseId}/members`);
     return data;
   },
-  createMemberExpenseTransaction: async (expenseMemberId: number) => {
-    const { data } = await api.post(`/groups/expenseMembers/${expenseMemberId}/transactions`);
+  createMemberExpenseTransaction: async (groupId: number) => {
+    const { data } = await api.post(`/groups/expenses/${groupId}/transactions`);
     return data;
   },
   createExpensePayment: async (expenseId: string) => {
